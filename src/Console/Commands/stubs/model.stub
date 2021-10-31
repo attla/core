@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ namespace }};
+
+use Attla\Database\Eloquent;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class {{ class }} extends Eloquent
+{
+    use HasFactory;
+}

@@ -2,8 +2,10 @@
 
 namespace Attla\Providers\Http;
 
-use Illuminate\Support\ServiceProvider;
+use Attla\Auth\Guard;
 use Attla\Auth\Authenticator;
+use Attla\Auth\DefaultProvider;
+use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -14,6 +16,14 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $defaultProvider = new DefaultProvider($this->app);
+        Guard::register('web', function () use ($defaultProvider) {
+            return $defaultProvider;
+        });
+        Guard::register('api', function () use ($defaultProvider) {
+            return $defaultProvider;
+        });
+
         $auth = new Authenticator($this->app);
         $this->app->instance('auth', $auth);
         $this->app['request']->setUserResolver(function ($guard = null) use ($auth) {

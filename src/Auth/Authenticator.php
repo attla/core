@@ -2,12 +2,11 @@
 
 namespace Attla\Auth;
 
-use App\Models\User;
-use Attla\Encrypter;
-use Illuminate\Support\Str;
-use Illuminate\Container\Container;
+use Attla\Application;
+use Attla\Auth\GuardInterface;
+use Illuminate\Contracts\Auth\Authenticatable;
 
-class Authenticator
+class Authenticator extends Guard
 {
     /**
      * @var \Illuminate\Container\Container
@@ -15,38 +14,16 @@ class Authenticator
     protected $app;
 
     /**
-     * @var \Illuminate\Http\Request
-     */
-    protected $request;
-
-    /**
-     * @var \App\Models\User
-     */
-    protected $user;
-
-    /**
-     * Column of user unique identifier
-     *
-     * @var string
-     */
-    protected $uniqueIdentifier;
-
-    /**
-     * The array of created "drivers".
-     *
-     * @var array
-     */
-    protected $guards = [
-        'web' => 'getCookieFirstSign',
-        'api' => 'getHeaderFirstSign',
-    ];
-
-    /**
-     * The array of created "drivers".
+     * The last guard used
      *
      * @var array
      */
     protected $guardUsed;
+
+    /**
+     * @var Authenticatable
+     */
+    protected $user;
 
     /**
      * The user resolver shared by various services
@@ -59,13 +36,12 @@ class Authenticator
     /**
      * Create a new authentication
      *
-     * @param \Illuminate\Container\Container $app
+     * @param \Attla\Application $app
      * @return void
      */
-    public function __construct(Container $app)
+    public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->request = $app['request'];
         $this->guard();
 
         $this->userResolver = function ($name = null) {
@@ -82,7 +58,7 @@ class Authenticator
     public function guard($name = null)
     {
         $this->guardUsed = $name ?: $this->getDefaultDriver();
-        $this->resolveGuard();
+        $this->user = $this->resolveGuard()->user();
         return $this;
     }
 
@@ -145,8 +121,8 @@ class Authenticator
      */
     public function id()
     {
-        if ($user = $this->user()) {
-            return $user->id;
+        if ($this->check()) {
+            return optional($this->user)->id;
         }
 
         return null;
@@ -159,7 +135,7 @@ class Authenticator
      */
     public function check()
     {
-        return !is_null($this->user);
+        return $this->user instanceof Authenticatable;
     }
 
     /**
@@ -173,22 +149,12 @@ class Authenticator
     }
 
     /**
-     * Log the user out of the application
-     *
-     * @return void
-     */
-    public function logout()
-    {
-        tokens()->delete('sign');
-    }
-
-    /**
      * Set the current user
      *
-     * @param \App\Models\User $user
+     * @param Authenticatable $user
      * @return $this
      */
-    public function setUser(User $user)
+    public function setUser(Authenticatable $user)
     {
         $this->user = $user;
         $user->exists = true;
@@ -196,208 +162,25 @@ class Authenticator
     }
 
     /**
-     * Validate a user's credentials
+     * Resolve guard instance
      *
-     * @param array $credentials
-     * @param int $remember
-     * @param bool $returnSign
-     * @return bool|string
+     * @return GuardInterface
      */
-    public function validate(array $credentials = [], int $remember = 1800, bool $returnSign = false)
+    protected function resolveGuard(): GuardInterface
     {
-        $credentials = $this->validateCredentials($credentials);
-
-        if (!$credentials && !$credentials = $this->validateCredentials($this->getRequestCredentials())) {
-            return false;
-        }
-
-        $user = $this->findUserByidentifier($credentials);
-
-        if (!is_null($user) && $this->checkCredentials($user, $credentials)) {
-            $this->setUser($user);
-            $sign = $this->createSign($user, $remember);
-
-            return $returnSign ? $sign : true;
-        } else {
-            return false;
-        }
+        return static::resolve($this->guardUsed, $this->app);
     }
 
     /**
-     * Attempt to authenticate a user using the given credentials
+     * Dynamically call the default guard driver instance
      *
-     * @param array $credentials
-     * @param int $remember
-     * @param bool $returnSign
-     * @return bool
+     * @param string $method
+     * @param array $parameters
+     * @return mixed
      */
-    public function attempt(array $credentials = [], int $remember = 1800, bool $returnSign = false)
+    public function __call($method, $parameters)
     {
-        return $this->validate($credentials, $remember, $returnSign);
-    }
-
-    /**
-     * Validate if credentials has required values
-     *
-     * @param array $credentials
-     * @return array|false
-     */
-    protected function validateCredentials(array $credentials)
-    {
-        $uniqueIdentifier = $this->getUniqueIdentifier($credentials);
-
-        if (!$uniqueIdentifier || empty($credentials['password'])) {
-            return false;
-        }
-
-        return [
-            $uniqueIdentifier => $credentials[$uniqueIdentifier],
-            'password' => $credentials['password']
-        ];
-    }
-
-    /**
-     * Get credentials from request
-     *
-     * @return array
-     */
-    protected function getRequestCredentials()
-    {
-        return $this->app['request']->only('email', 'user', 'username', 'password');
-    }
-
-    /**
-     * Get unique identifier of user from credentials
-     *
-     * @param array $credentials
-     * @return string|false
-     */
-    protected function getUniqueIdentifier(array $credentials)
-    {
-        foreach (['email', 'username', 'user'] as $uniqueIdentifier) {
-            if (array_key_exists($uniqueIdentifier, $credentials)) {
-                return $this->uniqueIdentifier = $uniqueIdentifier;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Retrieve a user by the given credentials
-     *
-     * @param array $credentials
-     * @return \App\Models\User|null
-     */
-    protected function findUserByidentifier(array $credentials)
-    {
-        if ($user = User::where($this->uniqueIdentifier, $credentials[$this->uniqueIdentifier])->first()) {
-            return $user;
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if a credential password given as valid
-     *
-     * @param \App\Models\User $user
-     * @param array $credentials
-     * @return bool
-     */
-    protected function checkCredentials(User $user, array $credentials)
-    {
-        return Encrypter::hashEquals($credentials['password'], $user->password);
-    }
-
-    /**
-     * Create a user sign
-     *
-     * @param \App\Models\User $user
-     * @param int $remember
-     * @return string
-     */
-    public function createSign(User $user, int $remember)
-    {
-        return tokens()->setSign('sign', $user->getAttributes(), $remember);
-    }
-
-    /**
-     * Renew a user sign
-     *
-     * @param int $remember
-     * @param bool $returnSign
-     * @return \App\Models\User|string|false
-     */
-    public function renewSign(int $remember = 1800, bool $returnSign = false)
-    {
-        if ($user = User::find($this->id())) {
-            $sign = $this->createSign($user, $remember);
-            return $returnSign ? $sign : $user;
-        }
-
-        return false;
-    }
-
-    /**
-     * Check a sign token on request
-     *
-     * @return void
-     */
-    protected function resolveGuard()
-    {
-        $user = null;
-        $guard = $this->guards[$this->guardUsed];
-
-        if (method_exists($this, $guard)) {
-            $sign = $this->{$guard}();
-        } elseif ($guard instanceof \Closure) {
-            $sign = $guard($this->app);
-        } else {
-            abort("Auth driver [{$guard}] is not defined.");
-        }
-
-        if (is_object($sign)) {
-            $user = new User((array) $sign);
-            $user->exists = true;
-        }
-
-        $this->user = $user;
-    }
-
-    /**
-     * Get the sign token from the request
-     *
-     * @return string
-     */
-    protected function getCookieFirstSign()
-    {
-        return tokens('sign') ?: $this->bearerToken();
-    }
-
-    /**
-     * Get the sign token from the request
-     *
-     * @return string
-     */
-    protected function getHeaderFirstSign()
-    {
-        return $this->bearerToken() ?: tokens('sign');
-    }
-
-    /**
-     * Get the bearer token from the request headers
-     *
-     * @return string
-     */
-    protected function bearerToken()
-    {
-        $token = $this->request->header('Authorization', '');
-
-        if (Str::startsWith($token, 'Bearer ')) {
-            $token = Str::substr($token, 7);
-        }
-
-        return $token;
+        return $this->resolveGuard()->{$method}(...$parameters);
+        return static::resolve($this->guardUsed)->{$method}(...$parameters);
     }
 }

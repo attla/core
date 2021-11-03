@@ -190,7 +190,7 @@ function app($abstract = null, array $parameters = [])
  *
  * @param string $name
  * @param array $parameters
- * @return mixed|Application
+ * @return mixed
  */
 function resolve($name, array $parameters = [])
 {

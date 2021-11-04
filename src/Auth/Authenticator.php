@@ -9,7 +9,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 class Authenticator extends Guard
 {
     /**
-     * @var \Illuminate\Container\Container
+     * @var \Attla\Application
      */
     protected $app;
 

@@ -2,12 +2,12 @@
 
 namespace Attla\Exceptions;
 
+use Attla\Application;
 use Closure;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler as ExceptionHandlerContract;
 use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -47,7 +47,7 @@ class Handler implements ExceptionHandlerContract
     /**
      * The container implementation.
      *
-     * @var \Illuminate\Contracts\Container\Container
+     * @var \Attla\Application
      */
     protected $container;
 
@@ -111,13 +111,12 @@ class Handler implements ExceptionHandlerContract
     /**
      * Create a new exception handler instance.
      *
-     * @param  \Illuminate\Contracts\Container\Container  $container
+     * @param \Attla\Application $container
      * @return void
      */
-    public function __construct()
+    public function __construct(Application $container)
     {
-        $this->container = app();
-
+        $this->container = $container;
         $this->register();
     }
 

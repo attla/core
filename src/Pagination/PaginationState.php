@@ -2,7 +2,7 @@
 
 namespace Attla\Pagination;
 
-use Illuminate\Container\Container;
+use Attla\Application;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\Cursor;
 use Illuminate\Pagination\CursorPaginator;
@@ -12,10 +12,10 @@ class PaginationState
     /**
      * Bind the pagination state resolvers using the given application container as a base
      *
-     * @param \Illuminate\Container\Container $app
+     * @param \Attla\Application $app
      * @return void
      */
-    public static function resolveUsing(Container $app)
+    public static function resolveUsing(Application $app)
     {
         $view = $app['view'];
 

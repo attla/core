@@ -23,9 +23,9 @@ class PaginationState
             if (is_dir($paginationPath = "$path/pagination")) {
                 return $paginationPath;
             }
-        })->filter(function ($path) {
-            return $path;
-        })->push(__DIR__ . '/views')->all());
+        })->filter()
+        ->push(__DIR__ . '/views')
+        ->all());
 
         $request = $app['request'];
 

@@ -3,7 +3,6 @@
 namespace Attla\Providers\Http;
 
 use Attla\Minify;
-use Attla\Application;
 use Illuminate\Support\ServiceProvider;
 
 class ViewServiceProvider extends ServiceProvider
@@ -96,8 +95,8 @@ class ViewServiceProvider extends ServiceProvider
             if (is_dir($flashPath = "$path/flash")) {
                 return $flashPath;
             }
-        })->filter(function ($path) {
-            return $path;
-        })->push(core_path('Flash/views'))->all());
+        })->filter()
+        ->push(core_path('Flash/views'))
+        ->all());
     }
 }

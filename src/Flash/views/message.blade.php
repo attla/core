@@ -11,9 +11,10 @@
     <div @class([
         'alert',
         'alert-' . $flash->type,
-        'alert-dismissible' => $flash->dismissible,
-        (!empty($between) ? $between : 'mb-2') => !$loop->last,
-        (!empty($last) ? $last : '') => $loop->last,
+        'alert-dismissible'                     => $flash->dismissible,
+        (!empty($between) ? $between : 'mb-2')  => !$loop->last,
+        (!empty($last) ? $last : '')            => $loop->last,
+        'rounded-0'                             => !empty($flatMessage),
     ]) role="alert">
         {!! $flash->message !!}
         @if($flash->dismissible)

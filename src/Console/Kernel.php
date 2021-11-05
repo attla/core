@@ -2,8 +2,7 @@
 
 namespace Attla\Console;
 
-use Closure;
-use Attla\Application;
+use Illuminate\Container\Container;
 use Illuminate\Console\Application as Artisan;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
@@ -22,7 +21,7 @@ class Kernel implements KernelContract
     /**
      * The application implementation
      *
-     * @var \Attla\Application
+     * @var \Illuminate\Container\Container
      */
     protected $app;
 
@@ -57,11 +56,11 @@ class Kernel implements KernelContract
     /**
      * Create a new console kernel instance
      *
-     * @param \Attla\Application $app
+     * @param \Illuminate\Container\Container $app
      * @param \Illuminate\Contracts\Events\Dispatcher $events
      * @return void
      */
-    public function __construct(Application $app, Dispatcher $events)
+    public function __construct(Container $app, Dispatcher $events)
     {
         $this->app = $app;
         $this->events = $events;
@@ -166,7 +165,7 @@ class Kernel implements KernelContract
      * @param \Closure $callback
      * @return \Attla\Console\ClosureCommand
      */
-    public function command($signature, Closure $callback)
+    public function command($signature, \Closure $callback)
     {
         $command = new ClosureCommand($signature, $callback);
 

@@ -58,7 +58,7 @@ class DefaultProvider implements GuardInterface
         $user = $this->findUserByIdentifier($credentials);
 
         if (!is_null($user) && $this->checkCredentials($user, $credentials)) {
-            // $this->setUser($user);
+            auth()->setUser($user);
             $sign = $this->createSign($user, $remember);
 
             return $returnSign ? $sign : true;
@@ -75,6 +75,7 @@ class DefaultProvider implements GuardInterface
      */
     public function fromUser(Authenticatable $user, int $remember = 1800)
     {
+        auth()->setUser($user);
         return $this->createSign($user, $remember);
     }
 

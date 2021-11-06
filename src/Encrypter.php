@@ -65,7 +65,7 @@ class Encrypter
      * @param string $str
      * @return string
      */
-    private static function md5($str)
+    public static function md5($str)
     {
         return self::encode(md5($str, true));
     }

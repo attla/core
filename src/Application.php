@@ -180,7 +180,6 @@ class Application extends Container
         if ($this->runningInConsole()) {
             $this->register($this->consoleProviders);
             $this->register($this[ContractConsoleKernel::class]->providers);
-            return;
         }
 
         $this->register(array_merge(
@@ -203,7 +202,7 @@ class Application extends Container
 
         $this->singleton(
             ContractHttpKernel::class,
-            \App\Http\kernel::class
+            \App\Http\Kernel::class
         );
 
         $this->singleton(

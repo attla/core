@@ -54,7 +54,7 @@ class ViewServiceProvider extends ServiceProvider
 
         // flash
         $blade->directive('message', function ($expression) {
-            return '<?php echo $__env->make(\'flash::message\', ' . $expression . ', '
+            return '<?php echo $__env->make(\'flash::message\', ' . ($expression ?: '[]') . ', '
                 . '\Illuminate\Support\Arr::except(get_defined_vars(), [\'__data\', \'__path\']))->render(); ?>';
         });
 

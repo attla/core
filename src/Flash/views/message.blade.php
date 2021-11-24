@@ -14,7 +14,7 @@
         'alert-dismissible'                     => $flash->dismissible,
         (!empty($between) ? $between : 'mb-2')  => !$loop->last,
         (!empty($last) ? $last : '')            => $loop->last,
-        'rounded-0'                             => !empty($flatMessage),
+        'rounded-0'                             => !empty($flat),
     ]) role="alert">
         {!! $flash->message !!}
         @if($flash->dismissible)

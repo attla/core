@@ -728,7 +728,7 @@ function yesterday($tz = null)
  * @param string $key
  * @return bool
  */
-function isBrowser($key = '')
+function is_browser($key = '')
 {
     return app(UserAgent::class)->isBrowser($key);
 }
@@ -759,7 +759,7 @@ function browser_version()
  * @param string $key
  * @return bool
  */
-function isMobile($key = '')
+function is_mobile($key = '')
 {
     return app(UserAgent::class)->isMobile($key);
 }
@@ -780,7 +780,7 @@ function mobile()
  * @param string $class
  * @return bool
  */
-function isRobot($key = '')
+function is_robot($key = '')
 {
     return app(UserAgent::class)->isRobot($key);
 }
@@ -820,7 +820,7 @@ function ip()
  *
  * @return bool
  */
-function isReferral()
+function is_referral()
 {
     return app(UserAgent::class)->isReferral();
 }

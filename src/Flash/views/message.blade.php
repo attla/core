@@ -9,7 +9,7 @@
     @endforeach
     <button type="button" class="btn-close" data-bs-dismiss="alert" data-bs-toggle="tooltip" title="Esconder" onclick="$('.tooltip').remove()"></button>
 </div>
-@elseif ($errors->any())
+@elseif ($errors->any() && !empty($showErrors))
 <div @class([
     'alert alert-danger alert-dismissible',
     (!empty($last) ? $last : '')            => !empty($last) ? $last : '',

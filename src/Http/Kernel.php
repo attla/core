@@ -37,7 +37,7 @@ class Kernel implements KernelContract
         \Attla\Middleware\SetTokens::class,
         \Attla\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        // \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];
 
     /**

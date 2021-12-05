@@ -941,7 +941,7 @@ function is_url($url)
  */
 function is_name($name)
 {
-    return (preg_match("/^[\\p{L}'-.]{4,}(?: [\\p{L}'-.]+)+$/ui", $name)) ? true : false;
+    return (preg_match("/^[\\p{L}'-.]{3,}(?: [\\p{L}'-.]+)+$/ui", $name)) ? true : false;
 }
 
 /**

@@ -4,7 +4,6 @@ namespace Attla\Providers\Http;
 
 use Attla\Tokens;
 use Attla\Encrypter;
-use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider;
 
 class TokensServiceProvider extends ServiceProvider
@@ -24,7 +23,7 @@ class TokensServiceProvider extends ServiceProvider
                 $tokens->{$key} = $value;
             }
 
-            $token = Encrypter::hash($request->root() . '/' . $request->path() . browser() . substr(browser_version(), 0, 2));
+            $token = Encrypter::hash(url()->full() . browser() . substr(browser_version(), 0, 2));
             $tokens->csrf = $token;
 
             return $tokens;

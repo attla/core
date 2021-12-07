@@ -106,7 +106,7 @@ class Csrf
             && !is_null($referer)
             && strpos($referer, $request->root()) !== false
             && $token === tokens($this->timeToken())
-            && (Encrypter::hashEquals($request->root() . '/' . $request->path() . $this->browser(), $token)
+            && (Encrypter::hashEquals(url()->full() . $this->browser(), $token)
                 || Encrypter::hashEquals($referer . $this->browser(), $token));
     }
 

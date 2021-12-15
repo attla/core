@@ -3,8 +3,8 @@
 namespace Attla\Database;
 
 use Attla\Encrypter;
-use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Contracts\Support\Arrayable;
 
 abstract class Eloquent extends EloquentModel
 {
@@ -25,22 +25,7 @@ abstract class Eloquent extends EloquentModel
             $attributes = (array) $attributes;
         }
 
-        parent::__construct($this->addEncodedId($attributes));
-    }
-
-    /**
-     * Set a encoded id to attributes
-     *
-     * @param array $attributes
-     * @return array
-     */
-    protected function addEncodedId($attributes)
-    {
-        if (isset($attributes['id'])) {
-            $attributes['encoded_id'] = jwt()->id($attributes['id']);
-        }
-
-        return $attributes;
+        parent::__construct($attributes);
     }
 
     /**
@@ -60,7 +45,8 @@ abstract class Eloquent extends EloquentModel
      */
     public function getEncodedIdAttribute()
     {
-        return !empty($this->encoded_id) ? $this->encoded_id : (!empty($this->id) ? jwt()->id($this->id) : null);
+        $key = $this->getKeyName();
+        return !empty($this->{$key}) ? jwt()->id($this->{$key}) : null;
     }
 
     /**

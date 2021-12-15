@@ -43,6 +43,21 @@ function jwt()
         {
             return Encrypter::jwt([], $id);
         }
+
+        /**
+         * Generate a unique identifier by secret
+         *
+         * @param mixed $id
+         * @return string
+         */
+        public function sid($id, $secret = null)
+        {
+            if (!$secret) {
+                $secret = Encrypter::md5(config('encrypt.secret'));
+            }
+
+            return Encrypter::jwt(['k' => $secret], $id);
+        }
     };
 }
 

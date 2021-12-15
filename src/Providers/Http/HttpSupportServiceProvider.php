@@ -21,7 +21,7 @@ class HttpSupportServiceProvider extends Aggregate
         \Illuminate\Routing\RoutingServiceProvider::class,
         SessionServiceProvider::class,
         \Illuminate\Translation\TranslationServiceProvider::class,
-        \Illuminate\Validation\ValidationServiceProvider::class,
+        ValidationServiceProvider::class,
         \Illuminate\View\ViewServiceProvider::class,
         ViewServiceProvider::class,
         PaginationServiceProvider::class,

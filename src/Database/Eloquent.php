@@ -3,6 +3,7 @@
 namespace Attla\Database;
 
 use Attla\Encrypter;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -80,6 +81,61 @@ abstract class Eloquent extends EloquentModel
         }
 
         return static::whereKey($id)->first($columns);
+    }
+
+    /**
+     * Set a given attribute on the model
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    public function setAttribute($key, $value)
+    {
+        $value = static::resolveEncodedId($value);
+
+        // First we will check for the presence of a mutator for the set operation
+        // which simply lets the developers tweak the attribute as it is set on
+        // this model, such as "json_encoding" a listing of data for storage.
+        if ($this->hasSetMutator($key)) {
+            return $this->setMutatedAttributeValue($key, $value);
+        }
+
+        // If an attribute is listed as a "date", we'll convert it from a DateTime
+        // instance into a form proper for storage on the database tables using
+        // the connection grammar's date format. We will auto set the values.
+        elseif ($value && $this->isDateAttribute($key)) {
+            $value = $this->fromDateTime($value);
+        }
+
+        if ($this->isEnumCastable($key)) {
+            $this->setEnumCastableAttribute($key, $value);
+            return $this;
+        }
+
+        if ($this->isClassCastable($key)) {
+            $this->setClassCastableAttribute($key, $value);
+            return $this;
+        }
+
+        if (! is_null($value) && $this->isJsonCastable($key)) {
+            $value = $this->castAttributeAsJson($key, $value);
+        }
+
+        // If this attribute contains a JSON ->, we'll set the proper value in the
+        // attribute's underlying array. This takes care of properly nesting an
+        // attribute in the array's value in the case of deeply nested items.
+        if (Str::contains($key, '->')) {
+            return $this->fillJsonAttribute($key, $value);
+        }
+
+        if (!is_null($value) && $this->isEncryptedCastable($key)) {
+            $value = $this->castAttributeAsEncryptedString($key, $value);
+        }
+
+        $this->attributes[$key] = $value;
+
+        return $this;
     }
 
     /**

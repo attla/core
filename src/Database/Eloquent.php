@@ -84,6 +84,17 @@ abstract class Eloquent extends EloquentModel
     }
 
     /**
+     * Create a new Eloquent query builder for the model
+     *
+     * @param \Illuminate\Database\Query\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder|static
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new Builder($query);
+    }
+
+    /**
      * Set a given attribute on the model
      *
      * @param string $key

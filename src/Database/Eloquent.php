@@ -20,23 +20,11 @@ abstract class Eloquent extends EloquentModel
     {
         Encapsulator::getInstance();
 
-        $this->appendEncodedId();
-
         if (!is_array($attributes)) {
             $attributes = (array) $attributes;
         }
 
         parent::__construct($attributes);
-    }
-
-    /**
-     * Add encoded id to appends property
-     *
-     * @return void
-     */
-    protected function appendEncodedId()
-    {
-        $this->appends = array_merge($this->appends, ['encoded_id']);
     }
 
     /**

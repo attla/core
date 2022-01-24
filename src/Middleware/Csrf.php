@@ -47,11 +47,13 @@ class Csrf
     {
         if (
             $this->isReading($request) ||
-            $this->inExceptArray($request) ||
             $this->tokensMatch($request)
         ) {
-            tokens()->set($this->timeToken(), tokens('csrf'), now()->endOfHour()->timestamp);
-            return $next($request);
+            return tap($next($request), function ($response) use ($request) {
+                if (!$this->inExceptArray($request)) {
+                    tokens()->set($this->timeToken(), tokens('csrf'), now()->endOfHour()->timestamp);
+                }
+            });
         }
 
         return back()->withErrors([

@@ -55,7 +55,7 @@ class XssProtection
     {
         $value = stripslashes($value);
         $value = strip_tags($value);
-        $value = filter_var($value, FILTER_SANITIZE_STRING);
+        $value = str_replace(["'", '"'], ['&#39;', '&#34;'], preg_replace('/\x00|<[^>]*>?/', '', $value));
         $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\xC2\xA0]/', '', $value);
         $value = $this->antiXSS->xss_clean($value);
         $value = preg_replace('/\\\\+0+/', '', $value);

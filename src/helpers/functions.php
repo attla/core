@@ -257,6 +257,20 @@ function route($name = null, $parameters = [], $absolute = true)
 }
 
 /**
+ * Create a new redirect response to a named route
+ *
+ * @param string $route
+ * @param mixed $parameters
+ * @param int $status
+ * @param array $headers
+ * @return \Illuminate\Http\RedirectResponse
+ */
+function to_route($route, $parameters = [], $status = 302, $headers = [])
+{
+    return redirect()->route($route, $parameters, $status, $headers);
+}
+
+/**
  * Get the available auth instance
  *
  * @param string|null $guard

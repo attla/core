@@ -11,6 +11,7 @@ use Attla\Console\Commands\{
     KeyGenerateCommand,
     ModelMakeCommand,
     PackageDiscoverCommand,
+    RouteListCommand,
     ServeCommand,
     VendorPublishCommand,
     ViewCacheCommand,
@@ -32,6 +33,7 @@ class CliServiceProvider extends ServiceProvider
         'DbWipe' => 'command.db.wipe',
         'KeyGenerate' => 'command.key.generate',
         'PackageDiscover' => 'command.package.discover',
+        'RouteList' => RouteListCommand::class,
         'Seed' => 'command.seed',
         'ViewCache' => 'command.view.cache',
         'ViewClear' => 'command.view.clear',
@@ -171,6 +173,18 @@ class CliServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.package.discover', function () {
             return new PackageDiscoverCommand();
+        });
+    }
+
+    /**
+     * Register the command
+     *
+     * @return void
+     */
+    protected function registerRouteListCommand()
+    {
+        $this->app->singleton(RouteListCommand::class, function ($app) {
+            return new RouteListCommand($app['router']);
         });
     }
 

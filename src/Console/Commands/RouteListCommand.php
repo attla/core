@@ -15,11 +15,11 @@ use Symfony\Component\Console\Terminal;
 class RouteListCommand extends Command
 {
     /**
-     * The console command signature
+     * The console command name
      *
      * @var string
      */
-    protected $signature = 'route:list';
+    protected $name = 'route:list';
 
     /**
      * The console command description

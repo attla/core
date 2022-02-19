@@ -15,20 +15,11 @@ use Symfony\Component\Console\Terminal;
 class RouteListCommand extends Command
 {
     /**
-     * The console command name
+     * The console command signature
      *
      * @var string
      */
-    protected $name = 'route:list';
-
-    /**
-     * The name of the console command
-     *
-     * This name is used to identify the command during lazy loading.
-     *
-     * @var string|null
-     */
-    protected static $defaultName = 'route:list';
+    protected $signature = 'route:list';
 
     /**
      * The console command description

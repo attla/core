@@ -105,8 +105,9 @@ class PackageDiscover
             $this->build();
         }
 
-        return $this->manifest = is_file($this->manifestPath) ?
-            $this->files->getRequire($this->manifestPath) : [];
+        return $this->manifest = is_file($this->manifestPath)
+            ? $this->files->getRequire($this->manifestPath)
+            : [];
     }
 
     /**

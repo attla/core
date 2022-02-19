@@ -29,7 +29,7 @@
         "illuminate/validation": "^9.0",
         "illuminate/view": "^9.0",
         "league/flysystem": "^3.0",
-        "symfony/var-dumper": "^5.3",
+        "symfony/var-dumper": "^6.0",
         "voku/anti-xss": "^4.1"
     },
     "require-dev": {},

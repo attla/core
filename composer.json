@@ -18,7 +18,6 @@
     "require": {
         "php": "^8.0.2",
         "doctrine/dbal": "^2.13.3|^3.1.2",
-        "filp/whoops": "^2.13",
         "illuminate/cache": "^9.0",
         "illuminate/console": "^9.0",
         "illuminate/cookie": "^9.0",
@@ -29,6 +28,7 @@
         "illuminate/validation": "^9.0",
         "illuminate/view": "^9.0",
         "league/flysystem": "^3.0",
+        "spatie/ignition": "^1.0",
         "symfony/var-dumper": "^6.0",
         "voku/anti-xss": "^4.1"
     },

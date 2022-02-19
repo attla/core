@@ -92,13 +92,22 @@ class Application extends Container
     protected $namespace;
 
     /**
+     * The application version
+     *
+     * @var string
+     */
+    protected $version;
+
+    /**
      * Get the version of the application
      *
      * @return string
      */
     public function version()
     {
-        $version = '0.0';
+        if (!is_null($this->version)) {
+            return $this->version;
+        }
 
         if (is_file($instaledPackagesFile = $this->basePath('/vendor/composer/installed.json'))) {
             $installed = json_decode(file_get_contents($instaledPackagesFile), true);
@@ -106,12 +115,12 @@ class Application extends Container
 
             foreach ($packages as $package) {
                 if ($package['name'] == $this->corePackage) {
-                    return $package['version'];
+                    return $this->version = $package['version'];
                 }
             }
         }
 
-        return $version;
+        throw new \RuntimeException('Unable to detect application version.');
     }
 
     /**
@@ -527,7 +536,7 @@ class Application extends Container
      */
     public function getNamespace()
     {
-        if (! is_null($this->namespace)) {
+        if (!is_null($this->namespace)) {
             return $this->namespace;
         }
 

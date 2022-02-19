@@ -53,6 +53,10 @@ class XssProtection
      */
     protected function cleanInput($value)
     {
+        if (is_null($value)) {
+            return $value;
+        }
+
         $value = stripslashes($value);
         $value = strip_tags($value);
         $value = str_replace(["'", '"'], ['&#39;', '&#34;'], preg_replace('/\x00|<[^>]*>?/', '', $value));

@@ -2,7 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Closure;
 use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Translation\Translator;
 use Attla\Encrypter;
@@ -43,7 +42,7 @@ class Csrf
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, \Closure $next)
     {
         if (
             $this->isReading($request) ||

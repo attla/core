@@ -2,8 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Closure;
-
 class TrimStrings extends TransformsRequest
 {
     /**
@@ -36,7 +34,7 @@ class TrimStrings extends TransformsRequest
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, \Closure $next)
     {
         foreach (static::$skipCallbacks as $callback) {
             if ($callback($request)) {
@@ -69,7 +67,7 @@ class TrimStrings extends TransformsRequest
      * @param \Closure $callback
      * @return void
      */
-    public static function skipWhen(Closure $callback)
+    public static function skipWhen(\Closure $callback)
     {
         static::$skipCallbacks[] = $callback;
     }

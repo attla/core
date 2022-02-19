@@ -2,7 +2,6 @@
 
 namespace Attla\Providers\Http;
 
-use Closure;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
@@ -55,7 +54,7 @@ class RouteServiceProvider extends ServiceProvider
      * @param \Closure $routesCallback
      * @return $this
      */
-    protected function routes(Closure $routesCallback)
+    protected function routes(\Closure $routesCallback)
     {
         $this->loadRoutesUsing = $routesCallback;
         return $this;

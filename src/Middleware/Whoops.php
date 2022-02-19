@@ -2,7 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Closure;
 use Illuminate\Http\Request;
 use Whoops\Run;
 use Whoops\Handler\PrettyPageHandler;
@@ -17,7 +16,7 @@ class Whoops
      * @param \Closure $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, \Closure $next)
     {
         $this->shouldDisplayException(config('debug'), $request);
 

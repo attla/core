@@ -2,13 +2,10 @@
 
 namespace Attla\Middleware;
 
-use Closure;
 use Attla\Encrypter;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Illuminate\Session\SessionManager;
-use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Response;
 
 class StartSession
 {
@@ -61,7 +58,7 @@ class StartSession
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, \Closure $next)
     {
         $session = $this->getSession();
         $session->start();

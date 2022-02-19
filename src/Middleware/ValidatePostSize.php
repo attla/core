@@ -2,7 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Closure;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 
 class ValidatePostSize
@@ -16,7 +15,7 @@ class ValidatePostSize
      *
      * @throws \Illuminate\Http\Exceptions\PostTooLargeException
      */
-    public function handle($request, Closure $next)
+    public function handle($request, \Closure $next)
     {
         $max = $this->getPostMaxSize();
 

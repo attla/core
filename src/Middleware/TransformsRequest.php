@@ -2,7 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Closure;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 class TransformsRequest
@@ -14,7 +13,7 @@ class TransformsRequest
      * @param \Closure $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, \Closure $next)
     {
         $this->clean($request);
 

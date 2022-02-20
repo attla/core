@@ -62,14 +62,55 @@ class Repository extends ServiceProvider
     {
         foreach ($this->queue as $provider) {
             if (!$this->isRegistered($provider)) {
-                $this->registered[] = $provider;
-                $instance = $this->createProvider($provider);
-                $this->instances[$provider] = $instance;
-                $instance->register();
+                if (is_string($provider)) {
+                    $provider = $this->resolveProvider($provider);
+                }
+
+                $provider->register();
+
+                // If there are bindings / singletons set as properties on the provider we
+                // will spin through them and register them with the application, which
+                // serves as a convenience layer while registering a lot of bindings
+                if (property_exists($provider, 'bindings')) {
+                    foreach ($provider->bindings as $key => $value) {
+                        $this->app->bind($key, $value);
+                    }
+                }
+
+                if (property_exists($provider, 'singletons')) {
+                    foreach ($provider->singletons as $key => $value) {
+                        $this->app->singleton($key, $value);
+                    }
+                }
+
+                $this->markAsRegistered($provider);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Resolve a service provider instance from the class name
+     *
+     * @param string $provider
+     * @return \Illuminate\Support\ServiceProvider
+     */
+    protected function resolveProvider($provider)
+    {
+        return new $provider($this->app);
+    }
+
+    /**
+     * Mark the given provider as registered
+     *
+     * @param \Illuminate\Support\ServiceProvider $provider
+     * @return void
+     */
+    protected function markAsRegistered($provider)
+    {
+        $this->instances[] = $provider;
+        $this->registered[] = get_class($provider);
     }
 
     /**
@@ -79,19 +120,16 @@ class Repository extends ServiceProvider
      */
     public function boot()
     {
-        foreach ($this->queue as $provider) {
-            if ($this->isRegistered($provider) && !$this->isBooted($provider)) {
-                $this->booted[] = $provider;
-                $instance = $this->instances[$provider];
+        foreach ($this->instances as $provider) {
+            if (!$this->isBooted($provider)) {
+                $provider->callBootingCallbacks();
 
-                $instance->callBootingCallbacks();
-
-                if (method_exists($instance, 'boot')) {
-                    // $this->app->call([$instance, 'boot']);
-                    $instance->boot();
+                if (method_exists($provider, 'boot')) {
+                    $provider->boot();
                 }
 
-                $instance->callBootedCallbacks();
+                $provider->callBootedCallbacks();
+                $this->booted[] = $this->name($provider);
             }
         }
 
@@ -99,14 +137,26 @@ class Repository extends ServiceProvider
     }
 
     /**
+     * Resolve service name
+     *
+     * @param \Illuminate\Support\ServiceProvider|string $provider
+     * @return string
+     */
+    protected function name($provider)
+    {
+        return is_string($provider) ? $provider : get_class($provider);
+    }
+
+    /**
      * Check if the service providers are registered
      *
-     * @param string $provider
+     * @param \Illuminate\Support\ServiceProvider|string $provider
      * @return bool
      */
     protected function isRegistered($provider)
     {
-        return in_array($provider, $this->registered) && isset($this->instances[$provider]);
+        $name = $this->name($provider);
+        return in_array($name, $this->registered) && isset($this->instances[$name]);
     }
 
     /**
@@ -117,18 +167,7 @@ class Repository extends ServiceProvider
      */
     protected function isBooted($provider)
     {
-        return in_array($provider, $this->booted);
-    }
-
-    /**
-     * Create a new provider instance
-     *
-     * @param string $provider
-     * @return \Illuminate\Support\ServiceProvider
-     */
-    protected function createProvider($provider)
-    {
-        return new $provider($this->app);
+        return in_array($this->name($provider), $this->booted);
     }
 
     /**

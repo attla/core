@@ -62,9 +62,8 @@ class Repository extends ServiceProvider
     {
         foreach ($this->queue as $provider) {
             if (!$this->isRegistered($provider)) {
-                if (is_string($provider)) {
-                    $provider = $this->resolveProvider($provider);
-                }
+                $provider = $this->resolveProvider($provider);
+                $this->markAsRegistered($provider);
 
                 $provider->register();
 
@@ -82,8 +81,6 @@ class Repository extends ServiceProvider
                         $this->app->singleton($key, $value);
                     }
                 }
-
-                $this->markAsRegistered($provider);
             }
         }
 
@@ -109,8 +106,9 @@ class Repository extends ServiceProvider
      */
     protected function markAsRegistered($provider)
     {
-        $this->instances[] = $provider;
-        $this->registered[] = get_class($provider);
+        $name = get_class($provider);
+        $this->instances[$name] = $provider;
+        $this->registered[] = $name;
     }
 
     /**
@@ -121,7 +119,8 @@ class Repository extends ServiceProvider
     public function boot()
     {
         foreach ($this->instances as $provider) {
-            if (!$this->isBooted($provider)) {
+            $name = $this->name($provider);
+            if (!$this->isBooted($name)) {
                 $provider->callBootingCallbacks();
 
                 if (method_exists($provider, 'boot')) {
@@ -129,7 +128,7 @@ class Repository extends ServiceProvider
                 }
 
                 $provider->callBootedCallbacks();
-                $this->booted[] = $this->name($provider);
+                $this->booted[] = $name;
             }
         }
 
@@ -150,13 +149,12 @@ class Repository extends ServiceProvider
     /**
      * Check if the service providers are registered
      *
-     * @param \Illuminate\Support\ServiceProvider|string $provider
+     * @param string $provider
      * @return bool
      */
     protected function isRegistered($provider)
     {
-        $name = $this->name($provider);
-        return in_array($name, $this->registered) && isset($this->instances[$name]);
+        return in_array($provider, $this->registered) && isset($this->instances[$provider]);
     }
 
     /**
@@ -167,13 +165,13 @@ class Repository extends ServiceProvider
      */
     protected function isBooted($provider)
     {
-        return in_array($this->name($provider), $this->booted);
+        return in_array($provider, $this->booted);
     }
 
     /**
      * Load new service providers
      *
-     * @param array|string $providers
+     * @param string[]|string $providers
      * @return $this
      */
     public function load($providers)

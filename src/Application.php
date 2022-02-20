@@ -201,7 +201,7 @@ class Application extends Container
      */
     protected function registerBaseServiceProviders()
     {
-        $this->register(new EventServiceProvider($this));
+        $this->register(EventServiceProvider::class);
     }
 
     /**

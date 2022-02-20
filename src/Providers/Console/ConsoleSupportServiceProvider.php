@@ -14,7 +14,6 @@ class ConsoleSupportServiceProvider extends Aggregate
      */
     protected $providers = [
         \Illuminate\Cache\CacheServiceProvider::class,
-        \Illuminate\Events\EventServiceProvider::class,
         \Illuminate\Database\DatabaseServiceProvider::class,
         \Illuminate\Filesystem\FilesystemServiceProvider::class,
         CliServiceProvider::class,

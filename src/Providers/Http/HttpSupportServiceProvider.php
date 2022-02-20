@@ -15,7 +15,6 @@ class HttpSupportServiceProvider extends Aggregate
         \Illuminate\Cache\CacheServiceProvider::class,
         \Illuminate\Cookie\CookieServiceProvider::class,
         TokensServiceProvider::class,
-        \Illuminate\Events\EventServiceProvider::class,
         \Illuminate\Database\DatabaseServiceProvider::class,
         \Illuminate\Filesystem\FilesystemServiceProvider::class,
         \Illuminate\Routing\RoutingServiceProvider::class,

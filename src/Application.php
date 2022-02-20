@@ -6,8 +6,10 @@ use Attla\PackageDiscover;
 use Attla\Providers\Repository;
 use Illuminate\Routing\Pipeline;
 use Illuminate\Container\Container;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Contracts\Http\Kernel as ContractHttpKernel;
 use Illuminate\Contracts\Console\Kernel as ContractConsoleKernel;
+use Illuminate\Events\EventServiceProvider;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Attla\Bootstrap\{
@@ -151,8 +153,69 @@ class Application extends Container
     public function bootstrap()
     {
         $this->registerBaseBindings();
+        $this->registerBaseServiceProviders();
         $this->registerAliases();
         $this->bootstrapWith($this->bootstrappers);
+    }
+
+    /**
+     * Register the basic bindings into the container
+     *
+     * @return void
+     */
+    protected function registerBaseBindings()
+    {
+        static::setInstance($this);
+        $this['app'] = $this;
+        $this[Container::class] = $this;
+        $this['provider'] = new Repository($this);
+
+        $this->singleton(
+            ContractHttpKernel::class,
+            \App\Http\Kernel::class
+        );
+
+        $this->singleton(
+            ContractConsoleKernel::class,
+            \App\Console\Kernel::class
+        );
+
+        $this->singleton(
+            \Illuminate\Contracts\Debug\ExceptionHandler::class,
+            \App\Exceptions\Handler::class
+        );
+
+        $this->singleton(PackageDiscover::class, function () {
+            return new PackageDiscover(
+                new Filesystem(),
+                $this->basePath(),
+                $this->packageServicesPath()
+            );
+        });
+    }
+
+    /**
+     * Register all of the base service providers
+     *
+     * @return void
+     */
+    protected function registerBaseServiceProviders()
+    {
+        $this->register(new EventServiceProvider($this));
+    }
+
+    /**
+     * Register the core class aliases in the container
+     *
+     * @return void
+     */
+    protected function registerAliases()
+    {
+        foreach ($this->aliases as $key => $aliases) {
+            foreach ($aliases as $alias) {
+                $this->alias($key, $alias);
+            }
+        }
     }
 
     /**
@@ -195,56 +258,6 @@ class Application extends Container
             $this->httpProviders,
             $this[ContractHttpKernel::class]->providers,
         ));
-    }
-
-    /**
-     * Register the basic bindings into the container
-     *
-     * @return void
-     */
-    protected function registerBaseBindings()
-    {
-        static::setInstance($this);
-        $this['app'] = $this;
-        $this[Container::class] = $this;
-        $this['provider'] = new Repository($this);
-
-        $this->singleton(
-            ContractHttpKernel::class,
-            \App\Http\Kernel::class
-        );
-
-        $this->singleton(
-            ContractConsoleKernel::class,
-            \App\Console\Kernel::class
-        );
-
-        $this->singleton(
-            \Illuminate\Contracts\Debug\ExceptionHandler::class,
-            \App\Exceptions\Handler::class
-        );
-
-        $this->singleton(PackageDiscover::class, function () {
-            return new PackageDiscover(
-                $this['files'],
-                $this->basePath(),
-                $this->packageServicesPath()
-            );
-        });
-    }
-
-    /**
-     * Register the core class aliases in the container
-     *
-     * @return void
-     */
-    protected function registerAliases()
-    {
-        foreach ($this->aliases as $key => $aliases) {
-            foreach ($aliases as $alias) {
-                $this->alias($key, $alias);
-            }
-        }
     }
 
     /**

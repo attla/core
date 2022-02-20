@@ -15,18 +15,18 @@ class SetRequest
      */
     public function bootstrap(Application $app)
     {
-        $app->instance('request', $app->runningInConsole() ? $this->createConsoleRequest($app) : $this->createRequest());
+        $app->instance('request', $app->runningInConsole() ? $this->createConsoleRequest($app) : Request::capture());
     }
 
     /**
      * Create a illuminate request for console
      *
      * @param \Attla\Application $app
-     * @return Request
+     * @return \Illuminate\Http\Request
      */
     protected function createConsoleRequest(Application $app)
     {
-        $uri = $app->make('config')->get('server.host', 'http://localhost');
+        $uri = $app['config']->get('server.host', 'http://localhost');
         $components = parse_url($uri);
         $server = $_SERVER;
 
@@ -38,15 +38,5 @@ class SetRequest
         }
 
         return Request::create($uri, 'GET', [], [], [], $server);
-    }
-
-    /**
-     * Create a illuminate request
-     *
-     * @return Request
-     */
-    protected function createRequest()
-    {
-        return Request::capture();
     }
 }

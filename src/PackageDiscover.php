@@ -97,11 +97,11 @@ class PackageDiscover
      */
     public function getManifest()
     {
-        if (! is_null($this->manifest)) {
+        if (!is_null($this->manifest)) {
             return $this->manifest;
         }
 
-        if (! is_file($this->manifestPath)) {
+        if (!is_file($this->manifestPath)) {
             $this->build();
         }
 
@@ -154,7 +154,7 @@ class PackageDiscover
      */
     protected function packagesToIgnore()
     {
-        if (! is_file($this->basePath . '/composer.json')) {
+        if (!is_file($this->basePath . '/composer.json')) {
             return [];
         }
 

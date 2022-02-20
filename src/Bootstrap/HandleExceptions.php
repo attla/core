@@ -2,13 +2,10 @@
 
 namespace Attla\Bootstrap;
 
-use ErrorException;
-use Exception;
 use Attla\Application;
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\ErrorHandler\Error\FatalError;
-use Throwable;
 
 class HandleExceptions
 {
@@ -62,7 +59,7 @@ class HandleExceptions
     public function handleError($level, $message, $file = '', $line = 0, $context = [])
     {
         if (error_reporting() & $level) {
-            throw new ErrorException($message, 0, $level, $file, $line);
+            throw new \ErrorException($message, 0, $level, $file, $line);
         }
     }
 
@@ -76,13 +73,13 @@ class HandleExceptions
      * @param \Throwable $e
      * @return void
      */
-    public function handleException(Throwable $e)
+    public function handleException(\Throwable $e)
     {
         try {
             self::$reservedMemory = null;
 
             $this->getExceptionHandler()->report($e);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             //
         }
 
@@ -99,7 +96,7 @@ class HandleExceptions
      * @param \Throwable $e
      * @return void
      */
-    protected function renderForConsole(Throwable $e)
+    protected function renderForConsole(\Throwable $e)
     {
         $this->getExceptionHandler()->renderForConsole(new ConsoleOutput(), $e);
     }
@@ -110,7 +107,7 @@ class HandleExceptions
      * @param \Throwable $e
      * @return void
      */
-    protected function renderHttpResponse(Throwable $e)
+    protected function renderHttpResponse(\Throwable $e)
     {
         $this->getExceptionHandler()->render($this->app['request'], $e)->send();
     }

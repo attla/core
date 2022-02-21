@@ -15,8 +15,12 @@ class Builder extends EloquentBuilder
      */
     public function resolveEncodedId($value)
     {
-        if ($encodedId = Encrypter::jwtDecode($value)) {
-            $value = $encodedId;
+        if (is_array($value)) {
+            return array_map([$this, 'resolveEncodedId'], $value);
+        }
+
+        if (is_string($value) and $encodedId = Encrypter::jwtDecode($value)) {
+            return $encodedId;
         }
 
         return $value;
@@ -33,19 +37,7 @@ class Builder extends EloquentBuilder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
-        if ($column instanceof \Closure && is_null($operator)) {
-            $column($query = $this->model->newQueryWithoutRelationships());
-
-            $this->query->addNestedWhereQuery($query->getQuery(), $boolean);
-        } else {
-            $args = func_get_args();
-            array_walk_recursive($args, function (&$value) {
-                $value = $this->resolveEncodedId($value);
-            });
-            $this->query->where(...$args);
-        }
-
-        return $this;
+        return parent::where(...$this->resolveEncodedId(func_get_args()));
     }
 
     /**
@@ -56,9 +48,7 @@ class Builder extends EloquentBuilder
      */
     public function update(array $values)
     {
-        return $this->toBase()->update($this->addUpdatedAtColumn(array_map(function ($value) {
-            return $this->resolveEncodedId($value);
-        }, $values)));
+        return parent::update($this->resolveEncodedId($values));
     }
 
     /**
@@ -71,26 +61,10 @@ class Builder extends EloquentBuilder
      */
     public function upsert(array $values, $uniqueBy, $update = null)
     {
-        if (empty($values)) {
-            return 0;
-        }
-
-        if (! is_array(reset($values))) {
-            $values = [$values];
-        }
-
-        if (is_null($update)) {
-            $update = array_keys(reset($values));
-        }
-
-        return $this->toBase()->upsert(
-            $this->addTimestampsToUpsertValues(array_map(function ($value) {
-                return $this->resolveEncodedId($value);
-            }, $values)),
+        return parent::upsert(
+            $this->resolveEncodedId($values),
             $uniqueBy,
-            $this->addUpdatedAtToUpsertColumns(array_map(function ($value) {
-                return $this->resolveEncodedId($value);
-            }, $update))
+            $this->resolveEncodedId($update),
         );
     }
 }

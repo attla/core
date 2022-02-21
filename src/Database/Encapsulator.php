@@ -48,33 +48,35 @@ class Encapsulator
      */
     public static function getDriverConfig($driver)
     {
+        $config = config();
+
         if ($driver == 'sqlite') {
             return [
                 'driver' => 'sqlite',
-                'url' => config('db.url'),
-                'database' => config('db.database', database_path('database.sqlite')),
+                'url' => $config->get('db.url'),
+                'database' => $config->get('db.database', database_path('database.sqlite')),
                 'prefix' => '',
-                'foreign_key_constraints' => config('db.foreign_keys', true),
+                'foreign_key_constraints' => $config->get('db.foreign_keys', true),
             ];
         }
 
         $connection = [
-            'url' => config('db.url'),
-            'host' => config('db.host', '127.0.0.1'),
-            'database' => config('db.database', 'attla'),
-            'username' => config('db.username', 'attla'),
-            'password' => config('db.password', ''),
-            'prefix' => config('db.prefix', ''),
+            'url' => $config->get('db.url'),
+            'host' => $config->get('db.host', '127.0.0.1'),
+            'database' => $config->get('db.database', 'attla'),
+            'username' => $config->get('db.username', 'attla'),
+            'password' => $config->get('db.password', ''),
+            'prefix' => $config->get('db.prefix', ''),
             'prefix_indexes' => true,
         ];
 
         if ($driver == 'mysql') {
             $connection = array_merge($connection, [
                 'driver' => 'mysql',
-                'port' => config('db.port', '3306'),
-                'unix_socket' => config('db.socket', ''),
-                'charset' => config('db.charset', 'utf8mb4'),
-                'collation' => config('db.collation', 'utf8mb4_unicode_ci'),
+                'port' => $config->get('db.port', '3306'),
+                'unix_socket' => $config->get('db.socket', ''),
+                'charset' => $config->get('db.charset', 'utf8mb4'),
+                'collation' => $config->get('db.collation', 'utf8mb4_unicode_ci'),
                 'strict' => true,
                 'engine' => null,
             ]);
@@ -83,7 +85,7 @@ class Encapsulator
         if ($driver == 'pgsql') {
             $connection = array_merge($connection, [
                 'driver' => 'pgsql',
-                'port' => config('db.port', '5432'),
+                'port' => $config->get('db.port', '5432'),
                 'charset' => 'utf8',
                 'schema' => 'public',
                 'sslmode' => 'prefer',
@@ -93,8 +95,8 @@ class Encapsulator
         if ($driver == 'sqlsrv') {
             $connection = array_merge($connection, [
                 'driver' => 'sqlsrv',
-                'host' => config('db.host', 'localhost'),
-                'port' => config('db.port', '1433'),
+                'host' => $config->get('db.host', 'localhost'),
+                'port' => $config->get('db.port', '1433'),
                 'charset' => 'utf8',
             ]);
         }

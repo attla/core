@@ -153,8 +153,8 @@ class Application extends Container
     public function bootstrap()
     {
         $this->registerBaseBindings();
-        $this->registerBaseServiceProviders();
         $this->registerAliases();
+        $this->registerBaseServiceProviders();
         $this->bootstrapWith($this->bootstrappers);
     }
 

@@ -2,30 +2,10 @@
 
 namespace Attla\Database;
 
-use Attla\Encrypter;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 class Builder extends EloquentBuilder
 {
-    /**
-     * Check if value is a endoded id and decode it
-     *
-     * @param array $value
-     * @return mixed
-     */
-    public function resolveEncodedId($value)
-    {
-        if (is_array($value)) {
-            return array_map([$this, 'resolveEncodedId'], $value);
-        }
-
-        if (is_string($value) and $encodedId = Encrypter::jwtDecode($value)) {
-            return $encodedId;
-        }
-
-        return $value;
-    }
-
     /**
      * Add a basic where clause to the query
      *
@@ -37,7 +17,7 @@ class Builder extends EloquentBuilder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and')
     {
-        return parent::where(...$this->resolveEncodedId(func_get_args()));
+        return parent::where(...EncodedId::resolver(func_get_args()));
     }
 
     /**
@@ -48,7 +28,7 @@ class Builder extends EloquentBuilder
      */
     public function update(array $values)
     {
-        return parent::update($this->resolveEncodedId($values));
+        return parent::update(EncodedId::resolver($values));
     }
 
     /**
@@ -62,9 +42,9 @@ class Builder extends EloquentBuilder
     public function upsert(array $values, $uniqueBy, $update = null)
     {
         return parent::upsert(
-            $this->resolveEncodedId($values),
+            EncodedId::resolver($values),
             $uniqueBy,
-            $this->resolveEncodedId($update),
+            EncodedId::resolver($update),
         );
     }
 }

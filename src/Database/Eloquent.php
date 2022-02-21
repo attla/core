@@ -2,7 +2,6 @@
 
 namespace Attla\Database;
 
-use Attla\Encrypter;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 abstract class Eloquent extends EloquentModel
@@ -33,23 +32,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function getEncodedIdAttribute()
     {
-        $key = $this->getKeyName();
-        return !empty($this->{$key}) ? jwt()->id($this->{$key}) : null;
-    }
-
-    /**
-     * Check if value is a endoded id and decode it
-     *
-     * @param array $value
-     * @return mixed
-     */
-    public static function resolveEncodedId($value)
-    {
-        if ($encodedId = Encrypter::jwtDecode($value)) {
-            return $encodedId;
-        }
-
-        return $value;
+        return EncodedId::generate($this);
     }
 
     /**
@@ -61,7 +44,7 @@ abstract class Eloquent extends EloquentModel
      */
     public static function find($id, $columns = ['*'])
     {
-        return parent::find(static::resolveEncodedId($id), $columns);
+        return parent::find(EncodedId::resolver($id), $columns);
     }
 
     /**
@@ -84,7 +67,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function setAttribute($key, $value)
     {
-        return parent::setAttribute($key, static::resolveEncodedId($value));
+        return parent::setAttribute($key, EncodedId::resolver($value));
     }
 
     /**
@@ -96,7 +79,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return parent::resolveRouteBinding(static::resolveEncodedId($value), $field);
+        return parent::resolveRouteBinding(EncodedId::resolver($value), $field);
     }
 
    /**
@@ -108,7 +91,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveSoftDeletableRouteBinding($value, $field = null)
     {
-        return parent::resolveSoftDeletableRouteBinding(static::resolveEncodedId($value), $field);
+        return parent::resolveSoftDeletableRouteBinding(EncodedId::resolver($value), $field);
     }
 
     /**
@@ -121,7 +104,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveChildRouteBinding($childType, $value, $field = null)
     {
-        return parent::resolveChildRouteBinding($childType, static::resolveEncodedId($value), $field);
+        return parent::resolveChildRouteBinding($childType, EncodedId::resolver($value), $field);
     }
 
     /**
@@ -134,7 +117,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveSoftDeletableChildRouteBinding($childType, $value, $field = null)
     {
-        return parent::resolveSoftDeletableChildRouteBinding($childType, static::resolveEncodedId($value), $field);
+        return parent::resolveSoftDeletableChildRouteBinding($childType, EncodedId::resolver($value), $field);
     }
 
     /**

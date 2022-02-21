@@ -3,9 +3,7 @@
 namespace Attla\Database;
 
 use Attla\Encrypter;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Illuminate\Contracts\Support\Arrayable;
 
 abstract class Eloquent extends EloquentModel
 {

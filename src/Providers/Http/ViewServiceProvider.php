@@ -8,16 +8,6 @@ use Illuminate\Support\ServiceProvider;
 class ViewServiceProvider extends ServiceProvider
 {
     /**
-     * Replacement namespaces
-     *
-     * @var array
-     */
-    protected $namespaces = [
-        'Route::' => 'Illuminate\Support\Facades\Route::',
-        'Arr::' => 'Illuminate\Support\Arr::',
-    ];
-
-    /**
      * Register the service provider
      *
      * @return void
@@ -31,7 +21,7 @@ class ViewServiceProvider extends ServiceProvider
 
         if ($this->app['config']['minify']) {
             $bladeCompiler->extend(function ($value, $compiler) {
-                return Minify::compile($this->replaceNamespaces($value), [
+                return Minify::compile($value, [
                     'disable_comments' => true,
                     'preserve_conditional_comments' => true,
                 ]);
@@ -76,17 +66,6 @@ class ViewServiceProvider extends ServiceProvider
         $blade->directive('asset', function ($expression) {
             return "<?php echo asset($expression); ?>";
         });
-    }
-
-    /**
-     * Replace laravel namespaces
-     *
-     * @param string $html
-     * @return string
-     */
-    private function replaceNamespaces($html)
-    {
-        return str_replace(array_keys($this->namespaces), array_values($this->namespaces), $html);
     }
 
     /**

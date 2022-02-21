@@ -1,22 +1,19 @@
 <?php
 
-namespace Attla\Middleware;
+namespace Attla\Providers\Http;
 
-use Illuminate\Http\Request;
-use Spatie\Ignition\Ignition as SpatieIgnition;
+use Spatie\Ignition\Ignition;
 
-class Ignition
+class IgnitionServiceProvider extends ServiceProvider
 {
     /**
-     * Handle an incoming request
+     * Register the service provider
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
-     * @return mixed
+     * @return void
      */
-    public function handle(Request $request, \Closure $next)
+    public function register()
     {
-        SpatieIgnition::make()
+        Ignition::make()
             ->theme('auto')
             ->applicationPath(app()->basePath())
             ->shouldDisplayException(config('debug'))
@@ -24,11 +21,8 @@ class Ignition
                 AddUserInformation::class,
                 AddEnvironmentInformation::class,
             ])->register();
-
-        return $next($request);
     }
 }
-
 
 use Spatie\FlareClient\FlareMiddleware\FlareMiddleware;
 use Spatie\FlareClient\Report;
@@ -37,7 +31,7 @@ class AddUserInformation implements FlareMiddleware
 {
     public function handle(Report $report, \Closure $next)
     {
-        $report->group('user', optional(auth()->user())->toArray());
+        $report->group('user', optional(\Auth::user())->toArray());
         return $next($report);
     }
 }
@@ -46,12 +40,12 @@ class AddEnvironmentInformation implements FlareMiddleware
 {
     public function handle(Report $report, \Closure $next)
     {
-        $attlaVersion = app()->version();
+        $attlaVersion = \App::version();
         $report->frameworkVersion($attlaVersion);
 
         $report->group('env', [
             'Attla version' => $attlaVersion,
-            'Attla locale' => app()->getLocale(),
+            'Attla locale' => \App::getLocale(),
             'App debug' => config('debug'),
             'environment' => config('app.env'),
             'php_version' => phpversion(),

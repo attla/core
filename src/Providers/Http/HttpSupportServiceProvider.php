@@ -12,6 +12,7 @@ class HttpSupportServiceProvider extends Aggregate
      * @var string[]
      */
     protected $providers = [
+        IgnitionServiceProvider::class,
         \Illuminate\Cache\CacheServiceProvider::class,
         \Illuminate\Cookie\CookieServiceProvider::class,
         TokensServiceProvider::class,

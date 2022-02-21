@@ -117,7 +117,7 @@ abstract class Eloquent extends EloquentModel
             return $this;
         }
 
-        if (! is_null($value) && $this->isJsonCastable($key)) {
+        if (!is_null($value) && $this->isJsonCastable($key)) {
             $value = $this->castAttributeAsJson($key, $value);
         }
 
@@ -146,10 +146,10 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return $this->where($field ?? $this->getRouteKeyName(), static::resolveEncodedId($value))->first();
+        return $this->resolveRouteBindingQuery($this, static::resolveEncodedId($value), $field)->first();
     }
 
-    /**
+   /**
      * Retrieve the model for a bound value
      *
      * @param mixed $value
@@ -158,9 +158,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveSoftDeletableRouteBinding($value, $field = null)
     {
-        $value = static::resolveEncodedId($value);
-
-        return $this->where($field ?? $this->getRouteKeyName(), $value)->withTrashed()->first();
+        return $this->resolveRouteBindingQuery($this, static::resolveEncodedId($value), $field)->withTrashed()->first();
     }
 
     /**

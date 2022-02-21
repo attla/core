@@ -16,14 +16,15 @@ abstract class Eloquent extends EloquentModel
      */
     protected static $withoutCache = false;
 
-    public function __construct($attributes = [])
+    /**
+     * Create a new Eloquent model instance
+     *
+     * @param array $attributes
+     * @return void
+     */
+    public function __construct(array $attributes = [])
     {
         Encapsulator::getInstance();
-
-        if (!is_array($attributes)) {
-            $attributes = (array) $attributes;
-        }
-
         parent::__construct($attributes);
     }
 
@@ -47,7 +48,7 @@ abstract class Eloquent extends EloquentModel
     public static function resolveEncodedId($value)
     {
         if ($encodedId = Encrypter::jwtDecode($value)) {
-            $value = $encodedId;
+            return $encodedId;
         }
 
         return $value;
@@ -62,13 +63,7 @@ abstract class Eloquent extends EloquentModel
      */
     public static function find($id, $columns = ['*'])
     {
-        $id = static::resolveEncodedId($id);
-
-        if (is_array($id) || $id instanceof Arrayable) {
-            return static::findMany($id, $columns);
-        }
-
-        return static::whereKey($id)->first($columns);
+        return parent::find(static::resolveEncodedId($id), $columns);
     }
 
     /**
@@ -91,50 +86,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function setAttribute($key, $value)
     {
-        $value = static::resolveEncodedId($value);
-
-        // First we will check for the presence of a mutator for the set operation
-        // which simply lets the developers tweak the attribute as it is set on
-        // this model, such as "json_encoding" a listing of data for storage.
-        if ($this->hasSetMutator($key)) {
-            return $this->setMutatedAttributeValue($key, $value);
-        }
-
-        // If an attribute is listed as a "date", we'll convert it from a DateTime
-        // instance into a form proper for storage on the database tables using
-        // the connection grammar's date format. We will auto set the values.
-        elseif ($value && $this->isDateAttribute($key)) {
-            $value = $this->fromDateTime($value);
-        }
-
-        if ($this->isEnumCastable($key)) {
-            $this->setEnumCastableAttribute($key, $value);
-            return $this;
-        }
-
-        if ($this->isClassCastable($key)) {
-            $this->setClassCastableAttribute($key, $value);
-            return $this;
-        }
-
-        if (!is_null($value) && $this->isJsonCastable($key)) {
-            $value = $this->castAttributeAsJson($key, $value);
-        }
-
-        // If this attribute contains a JSON ->, we'll set the proper value in the
-        // attribute's underlying array. This takes care of properly nesting an
-        // attribute in the array's value in the case of deeply nested items.
-        if (Str::contains($key, '->')) {
-            return $this->fillJsonAttribute($key, $value);
-        }
-
-        if (!is_null($value) && $this->isEncryptedCastable($key)) {
-            $value = $this->castAttributeAsEncryptedString($key, $value);
-        }
-
-        $this->attributes[$key] = $value;
-
-        return $this;
+        return parent::setAttribute($key, static::resolveEncodedId($value));
     }
 
     /**
@@ -146,7 +98,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return $this->resolveRouteBindingQuery($this, static::resolveEncodedId($value), $field)->first();
+        return parent::resolveRouteBinding(static::resolveEncodedId($value), $field);
     }
 
    /**
@@ -158,7 +110,7 @@ abstract class Eloquent extends EloquentModel
      */
     public function resolveSoftDeletableRouteBinding($value, $field = null)
     {
-        return $this->resolveRouteBindingQuery($this, static::resolveEncodedId($value), $field)->withTrashed()->first();
+        return parent::resolveSoftDeletableRouteBinding(static::resolveEncodedId($value), $field);
     }
 
     /**
@@ -169,9 +121,9 @@ abstract class Eloquent extends EloquentModel
      * @param string|null $field
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveChildRouteBinding($childType, $value, $field)
+    public function resolveChildRouteBinding($childType, $value, $field = null)
     {
-        return $this->resolveChildRouteBindingQuery($childType, static::resolveEncodedId($value), $field)->first();
+        return parent::resolveChildRouteBinding($childType, static::resolveEncodedId($value), $field);
     }
 
     /**
@@ -182,11 +134,9 @@ abstract class Eloquent extends EloquentModel
      * @param string|null $field
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveSoftDeletableChildRouteBinding($childType, $value, $field)
+    public function resolveSoftDeletableChildRouteBinding($childType, $value, $field = null)
     {
-        $value = static::resolveEncodedId($value);
-
-        return $this->resolveChildRouteBindingQuery($childType, $value, $field)->withTrashed()->first();
+        return parent::resolveSoftDeletableChildRouteBinding($childType, static::resolveEncodedId($value), $field);
     }
 
     /**

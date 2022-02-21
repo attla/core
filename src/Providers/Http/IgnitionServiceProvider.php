@@ -3,6 +3,7 @@
 namespace Attla\Providers\Http;
 
 use Spatie\Ignition\Ignition;
+use Illuminate\Support\ServiceProvider;
 
 class IgnitionServiceProvider extends ServiceProvider
 {

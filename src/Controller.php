@@ -2,8 +2,8 @@
 
 namespace Attla;
 
-use Attla\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Attla\Validation\ValidatesRequests;
 
 class Controller extends BaseController
 {

@@ -2,9 +2,7 @@
 
 namespace Attla\Validation;
 
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
 trait ValidatesRequests
@@ -75,7 +73,6 @@ trait ValidatesRequests
             return $this->validate($request, $rules, $messages, $customAttributes);
         } catch (ValidationException $e) {
             $e->errorBag = $errorBag;
-
             throw $e;
         }
     }

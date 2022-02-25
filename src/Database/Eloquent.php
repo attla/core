@@ -36,18 +36,6 @@ abstract class Eloquent extends EloquentModel
     }
 
     /**
-     * Find a model by its primary key
-     *
-     * @param mixed $id
-     * @param array $columns
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
-     */
-    public static function find($id, $columns = ['*'])
-    {
-        return parent::find(EncodedId::resolver($id), $columns);
-    }
-
-    /**
      * Create a new Eloquent query builder for the model
      *
      * @param \Illuminate\Database\Query\Builder $query

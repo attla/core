@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 class Builder extends EloquentBuilder
 {
     /**
+     * Find a model by its primary key
+     *
+     * @param mixed $id
+     * @param array $columns
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
+     */
+    public static function find($id, $columns = ['*'])
+    {
+        return parent::find(EncodedId::resolver($id), $columns);
+    }
+
+    /**
      * Add a basic where clause to the query
      *
      * @param \Closure|string|array|\Illuminate\Database\Query\Expression $column

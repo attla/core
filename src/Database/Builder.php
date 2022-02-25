@@ -13,7 +13,7 @@ class Builder extends EloquentBuilder
      * @param array $columns
      * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection|static[]|static|null
      */
-    public static function find($id, $columns = ['*'])
+    public function find($id, $columns = ['*'])
     {
         return parent::find(EncodedId::resolver($id), $columns);
     }

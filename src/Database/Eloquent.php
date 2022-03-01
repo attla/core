@@ -16,10 +16,10 @@ abstract class Eloquent extends EloquentModel
     /**
      * Create a new Eloquent model instance
      *
-     * @param array $attributes
+     * @param array|object $attributes
      * @return void
      */
-    public function __construct(array $attributes = [])
+    public function __construct($attributes = [])
     {
         Encapsulator::getInstance();
 

@@ -22,6 +22,16 @@ abstract class Eloquent extends EloquentModel
     public function __construct(array $attributes = [])
     {
         Encapsulator::getInstance();
+
+        if (
+            is_object($attributes)
+            && method_exists($attributes, 'toArray')
+        ) {
+            $attributes = $attributes->toArray();
+        } elseif (!is_array($attributes)) {
+            $attributes = (array) $attributes;
+        }
+
         parent::__construct($attributes);
     }
 

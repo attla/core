@@ -32,7 +32,9 @@ class AddUserInformation implements FlareMiddleware
 {
     public function handle(Report $report, \Closure $next)
     {
-        $report->group('user', optional(\Auth::user())->toArray());
+        if ($user = \Auth::user()) {
+            $report->group('user', $user->toArray());
+        }
         return $next($report);
     }
 }

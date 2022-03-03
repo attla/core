@@ -60,17 +60,6 @@ class Encrypter
     }
 
     /**
-     * Encrypt an md5 in bytes of a string
-     *
-     * @param string $str
-     * @return string
-     */
-    public static function md5($str)
-    {
-        return self::encode(md5($str, true));
-    }
-
-    /**
      * Convert array and objects to strings
      *
      * @param array|object $item
@@ -134,35 +123,6 @@ class Encrypter
     }
 
     /**
-     * Encode a string with URL-safe Base64
-     *
-     * @param string $input The string you want encoded
-     * @return string The base64 encode of what you passed in
-     */
-    public static function urlsafeB64Encode($data)
-    {
-        return str_replace('=', '', strtr(base64_encode($data), '+/', '-.'));
-    }
-
-    /**
-     * Decode a string with URL-safe Base64
-     *
-     * @param string $data A Base64 encoded string
-     * @return string A decoded string
-     */
-    public static function urlsafeB64Decode($data)
-    {
-        $remainder = strlen($data) % 4;
-
-        if ($remainder) {
-            $padlen = 4 - $remainder;
-            $data .= str_repeat('=', $padlen);
-        }
-
-        return base64_decode(strtr($data, '-.', '+/'));
-    }
-
-    /**
      * Encrypt a anyting with secret key
      *
      * @param mixed $data
@@ -206,86 +166,42 @@ class Encrypter
     }
 
     /**
-     * Modified implementation of a JWT
+     * Encode a string with URL-safe Base64
      *
-     * @param array|object $header
-     * @param array|object $payload
-     * @return string
+     * @param string $input The string you want encoded
+     * @return string The base64 encode of what you passed in
      */
-    public static function jwt($header, $payload)
+    public static function urlsafeB64Encode($data)
     {
-        if (is_object($header)) {
-            $header = (array) $header;
-        }
-
-        if (!isset($header['k'])) {
-            $header['k'] = self::generateKey(6);
-        }
-
-        $payload = self::encode($payload, $header['k']);
-        $header = self::encode($header);
-
-        return $header . '_' . $payload . '_' . self::md5($header . $payload);
+        return str_replace('=', '', strtr(base64_encode($data), '+/', '-.'));
     }
 
     /**
-     * Check if JWT is valid and returns payload
+     * Decode a string with URL-safe Base64
      *
-     * @param string $jwt
-     * @param bool $assoc
-     * @return mixed
+     * @param string $data A Base64 encoded string
+     * @return string A decoded string
      */
-    public static function jwtDecode($jwt, bool $assoc = false)
+    public static function urlsafeB64Decode($data)
     {
-        if (!$jwt || !is_string($jwt)) {
-            return false;
+        $remainder = strlen($data) % 4;
+
+        if ($remainder) {
+            $padlen = 4 - $remainder;
+            $data .= str_repeat('=', $padlen);
         }
 
-        $jwt = explode('_', $jwt);
-
-        if (count($jwt) != 3 || $jwt[2] != self::md5($jwt[0] . $jwt[1])) {
-            return false;
-        }
-
-        if (
-            $header = self::decode($jwt[0])
-            and is_object($header)
-            and $payload = self::decode($jwt[1], $header->k, $assoc)
-            and $payload
-        ) {
-            if (isset($header->ttl) && time() > $header->ttl) {
-                return false;
-            }
-            if (isset($header->iss) && $_SERVER['HTTP_HOST'] != $header->iss) {
-                return false;
-            }
-            if (isset($header->bwr) && browser() . substr(browser_version(), 0, 2) != $header->bwr) {
-                return false;
-            }
-            if (isset($header->ip) && ip() != $header->ip) {
-                return false;
-            }
-
-            return $payload;
-        }
-
-        return false;
+        return base64_decode(strtr($data, '-.', '+/'));
     }
 
     /**
-     * Help function to create a JWT
+     * Encrypt an md5 in bytes of a string
      *
-     * @param array|object $data
-     * @param int $ttl
+     * @param string $str
      * @return string
      */
-    public static function sign($data, int $ttl = 1800)
+    public static function md5($str)
     {
-        return self::jwt([
-            'ttl' => time() > $ttl ? time() + $ttl : $ttl,
-            'iss' => $_SERVER['HTTP_HOST'],
-            'bwr' => browser() . substr(browser_version(), 0, 2),
-            'ip' => ip(),
-        ], $data);
+        return self::encode(md5((string) $str, true));
     }
 }

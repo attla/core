@@ -149,7 +149,7 @@ class Tokens
      */
     public function setSign(string $key, $value, int $ttl = 1800)
     {
-        $value = Encrypter::sign($value, $ttl);
+        $value = \Jwt::sign($value, $ttl);
         return $this->set($key, $value, $ttl);
     }
 
@@ -252,7 +252,7 @@ class Tokens
             return Encrypter::decode($value);
         }
 
-        if ($jwtDecoded = Encrypter::jwtDecode($value)) {
+        if ($jwtDecoded = \Jwt::decode($value)) {
             return $jwtDecoded;
         }
 

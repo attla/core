@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Facade;
 
 class RegisterFacades
 {
+    private $aliases = [
+        'Jwt' => Attla\Facades\Jwt::class,
+    ];
+
     /**
      * Bootstrap the given application
      *
@@ -24,6 +28,7 @@ class RegisterFacades
             Facade::defaultAliases()
                 ->merge($app['config']->get('aliases', []))
                 ->merge($app[PackageDiscover::class]->aliases())
+                ->merge($this->aliases)
                 ->toArray()
         )->register();
     }

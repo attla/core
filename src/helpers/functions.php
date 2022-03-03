@@ -6,63 +6,8 @@ use Attla\Application;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Date;
 
-function jwt()
-{
-    return new class {
-        /**
-         * Generate a elegant JWT
-         *
-         * @param array|object $header
-         * @param array|object $payload
-         * @return string
-         */
-        public function encode($header, $payload)
-        {
-            return Encrypter::jwt($header, $payload);
-        }
-
-        /**
-         * Check if JWT is valid and returns payload
-         *
-         * @param string $jwt
-         * @param bool $assoc
-         * @return false|mixed
-         */
-        public function decode($jwt, $assoc = false)
-        {
-            return Encrypter::jwtDecode($jwt, $assoc);
-        }
-
-        /**
-         * Generate a unique identifier of anything
-         *
-         * @param mixed $id
-         * @return string
-         */
-        public function id($id)
-        {
-            return Encrypter::jwt([], $id);
-        }
-
-        /**
-         * Generate a unique identifier by secret
-         *
-         * @param mixed $id
-         * @return string
-         */
-        public function sid($id, $secret = null)
-        {
-            if (!$secret) {
-                $secret = Encrypter::md5(config('encrypt.secret'));
-            }
-
-            return Encrypter::jwt(['k' => $secret], $id);
-        }
-    };
-}
-
 /**
- * Encrypt a anyting
+ * Encode anything
  *
  * @param mixed $data
  * @return mixed
@@ -73,7 +18,7 @@ function encode($data)
 }
 
 /**
- * Decrypt a anyting
+ * Decode anything
  *
  * @param mixed $data
  * @param bool $assoc

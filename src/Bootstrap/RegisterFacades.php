@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
 class RegisterFacades
 {
     private $aliases = [
-        'Jwt' => Attla\Facades\Jwt::class,
+        'Jwt' => \Attla\Facades\Jwt::class,
     ];
 
     /**

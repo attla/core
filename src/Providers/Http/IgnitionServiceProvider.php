@@ -14,9 +14,13 @@ class IgnitionServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        if (\App::runningInConsole()) {
+            return;
+        }
+
         Ignition::make()
-            ->theme('auto')
-            ->applicationPath(app()->basePath())
+            ->setTheme('auto')
+            ->applicationPath(\App::basePath())
             ->shouldDisplayException(config('debug'))
             ->registerMiddleware([
                 AddUserInformation::class,

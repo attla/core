@@ -108,7 +108,7 @@ class Csrf
             && strpos($referer, $request->root()) !== false
             && $token === tokens($this->timeToken())
             && (Encrypter::hashEquals(url()->full() . $this->browser(), $token)
-                || Encrypter::hashEquals($referer . $this->browser(), $token));
+                || Encrypter::hashEquals(rtrim($referer, '/') . $this->browser(), $token));
     }
 
     /**

@@ -89,7 +89,7 @@ class Config extends \ArrayObject
     }
 
     /**
-     * Prepend a value onto an array configuration value
+     * Prepend a value into an array configuration value
      *
      * @param string $key
      * @param mixed $value
@@ -104,7 +104,7 @@ class Config extends \ArrayObject
     }
 
     /**
-     * Push a value onto an array configuration value
+     * Push a value into an array configuration value
      *
      * @param string $key
      * @param mixed $value

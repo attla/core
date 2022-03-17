@@ -202,6 +202,7 @@ class Application extends Container
     protected function registerBaseServiceProviders()
     {
         $this->register(EventServiceProvider::class);
+        $this->register(\Illuminate\Routing\RoutingServiceProvider::class);
     }
 
     /**

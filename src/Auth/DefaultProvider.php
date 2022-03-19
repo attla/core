@@ -2,6 +2,8 @@
 
 namespace Attla\Auth;
 
+use Attla\Jwt;
+use Attla\Cookier;
 use App\Models\User;
 use Attla\Encrypter;
 use Attla\Application;
@@ -10,7 +12,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
 
 class DefaultProvider implements GuardInterface
 {
-
     /**
      * @var \Illuminate\Http\Request
      */
@@ -88,7 +89,7 @@ class DefaultProvider implements GuardInterface
     {
         $user = null;
 
-        if (is_object($sign = tokens('sign') ?: $this->bearerToken())) {
+        if (is_object($sign = Cookier::get('sign') ?: $this->bearerToken())) {
             $user = new User((array) $sign);
             $user->exists = true;
         }
@@ -103,7 +104,7 @@ class DefaultProvider implements GuardInterface
      */
     public function logout()
     {
-        tokens()->delete('sign');
+        Cookier::forget('sign');
     }
 
     /**
@@ -189,7 +190,9 @@ class DefaultProvider implements GuardInterface
      */
     public function createSign(Authenticatable $user, int $remember)
     {
-        return tokens()->setSign('sign', $user->getAttributes(), $remember);
+        $sign = Jwt::sign($user->getAttributes(), $remember);
+        Cookier::set('sign', $sign);
+        return $sign;
     }
 
     /**

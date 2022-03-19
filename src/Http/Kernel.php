@@ -34,7 +34,6 @@ class Kernel implements KernelContract
      * @var string[]
      */
     protected $middlewarePriority = [
-        \Attla\Middleware\SetTokens::class,
         \Attla\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \Illuminate\Routing\Middleware\SubstituteBindings::class,

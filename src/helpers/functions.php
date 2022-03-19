@@ -604,21 +604,47 @@ function assetPath($file)
 }
 
 /**
- * Set/get tokens of the application
+ * Create a new cookie instance
  *
- * @param string|null $key
- * @param mixed $default
- * @return \Attla\Tokens|\stdClass|string|array|null
+ * @param string|null $name
+ * @param string|null $value
+ * @param int $minutes
+ * @param string|null $path
+ * @param string|null $domain
+ * @param bool|null $secure
+ * @param bool $httpOnly
+ * @param bool $raw
+ * @param string|null $sameSite
+ * @return \Illuminate\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
  */
-function tokens($key = null, $default = null)
-{
-    $tokens = app('tokens');
+function cookie(
+    $name = null,
+    $value = null,
+    $minutes = 0,
+    $path = null,
+    $domain = null,
+    $secure = null,
+    $httpOnly = true,
+    $raw = false,
+    $sameSite = null
+) {
+    $cookie = app('cookier');
 
-    if (is_null($key)) {
-        return $tokens;
+    if (is_null($name)) {
+        return $cookie;
     }
 
-    return is_null($value = $tokens->get($key)) ? $default : $value;
+    return $cookie->set(
+        $name,
+        $value,
+        $minutes,
+        $path,
+        $domain,
+        $secure,
+        $httpOnly,
+        $raw,
+        $sameSite
+    );
 }
 
 /**

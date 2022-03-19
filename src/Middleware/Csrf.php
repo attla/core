@@ -2,9 +2,9 @@
 
 namespace Attla\Middleware;
 
-use Symfony\Component\HttpFoundation\Cookie;
-use Illuminate\Translation\Translator;
+use Attla\Cookier;
 use Attla\Encrypter;
+use Illuminate\Translation\Translator;
 
 class Csrf
 {
@@ -48,11 +48,11 @@ class Csrf
             $this->isReading($request) ||
             $this->tokensMatch($request)
         ) {
-            return tap($next($request), function ($response) use ($request) {
-                if (!$this->inExceptArray($request)) {
-                    tokens()->set($this->timeToken(), tokens('csrf'), now()->endOfHour()->timestamp);
-                }
-            });
+            if (!$this->inExceptArray($request)) {
+                Cookier::set($this->timeToken(), config('csrf'), 60);
+            }
+
+            return $next($request);
         }
 
         return back()->withErrors([
@@ -106,7 +106,7 @@ class Csrf
         return is_string($token)
             && !is_null($referer)
             && strpos($referer, $request->root()) !== false
-            && $token === tokens($this->timeToken())
+            && $token === Cookier::get($this->timeToken())
             && (Encrypter::hashEquals(url()->full() . $this->browser(), $token)
                 || Encrypter::hashEquals(rtrim($referer, '/') . $this->browser(), $token));
     }
@@ -120,31 +120,6 @@ class Csrf
     protected function getTokenFromRequest($request)
     {
         return $request->input($this->timeToken()) ?: $request->header('X-CSRF-TOKEN');
-    }
-
-    /**
-     * Add the CSRF token to the response cookies.
-     *
-     */
-    protected function addCookieToResponse($response)
-    {
-        if (!empty($response->headers)) {
-            $response->headers->setCookie(
-                new Cookie(
-                    $this->timeToken(),
-                    tokens('csrf'),
-                    time() + 3600,
-                    '/',
-                    false,
-                    true,
-                    false,
-                    false,
-                    null
-                )
-            );
-        }
-
-        return $response;
     }
 
     /**
@@ -190,7 +165,9 @@ class Csrf
     public function getCsrfInput($request)
     {
         $randomNl = $this->randomRepeat([" ", "\r", "\n", "\t"], 6);
-        $formatInput = '%s<input%stype="hidden"%sname="' . $this->timeToken() . '"%svalue="' . tokens('csrf') . '"%s/>%s';
+        $formatInput = '%s<input%stype="hidden"%sname="'
+            . $this->timeToken() . '"%svalue="'
+            . config('csrf') . '"%s/>%s';
 
         return vsprintf($formatInput, $randomNl);
     }

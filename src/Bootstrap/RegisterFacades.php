@@ -6,11 +6,16 @@ use Attla\Application;
 use Attla\AliasLoader;
 use Attla\PackageDiscover;
 use Illuminate\Support\Facades\Facade;
+use Attla\Facades\{
+    Cookie,
+    Jwt,
+};
 
 class RegisterFacades
 {
     private $aliases = [
-        'Jwt' => \Attla\Facades\Jwt::class,
+        'Cookie' => Cookie::class,
+        'Jwt' => Jwt::class,
     ];
 
     /**

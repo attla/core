@@ -2,6 +2,7 @@
 
 namespace Attla\Middleware;
 
+use Attla\Cookier;
 use Attla\Encrypter;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
@@ -48,7 +49,6 @@ class StartSession
         $this->manager = $manager;
         $this->store = $manager->driver();
         $this->config = $manager->getSessionConfig();
-        $this->tokens = tokens();
     }
 
     /**
@@ -89,7 +89,7 @@ class StartSession
      */
     public function getSession()
     {
-        $sessionCookie = $this->tokens->get('session');
+        $sessionCookie = Cookier::get('session');
         if ($sessionCookie && $this->isCookieDriver()) {
             $sessionCookieObject = Encrypter::decode($sessionCookie);
             if (is_array($sessionCookieObject) || is_object($sessionCookieObject)) {
@@ -149,18 +149,8 @@ class StartSession
             $value = $this->isCookieDriver() ? Encrypter::encode(collect($session->all())->except('_token')) : $session->getId();
             config(['encrypt.mode' => $stringMode]);
 
-            $this->tokens->set('session', $value, $this->getCookieExpirationDate());
+            Cookier::set('session', $value, $this->config['lifetime']);
         }
-    }
-
-    /**
-     * Get the cookie lifetime in seconds
-     *
-     * @return int
-     */
-    protected function getCookieExpirationDate()
-    {
-        return time() + $this->config['lifetime'] * 60;
     }
 
     /**

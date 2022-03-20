@@ -191,7 +191,7 @@ class DefaultProvider implements GuardInterface
     public function createSign(Authenticatable $user, int $remember)
     {
         $sign = Jwt::sign($user->getAttributes(), $remember);
-        Cookier::set('sign', $sign);
+        Cookier::set('sign', $sign, $remember);
         return $sign;
     }
 

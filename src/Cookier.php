@@ -100,7 +100,7 @@ class Cookier extends \ArrayObject
      * @param mixed $default
      * @return string|array|null
      */
-    public static function get($name = null, $default = null)
+    public static function get($name = null, $default = null, $original = false)
     {
         if (is_array($name)) {
             return static::getMany($name);
@@ -110,7 +110,9 @@ class Cookier extends \ArrayObject
             return static::all();
         }
 
-        return static::value(static::$request->cookie(static::withPrefix($name), $default));
+        $value = static::$request->cookie(static::withPrefix($name), $default);
+
+        return $original ? $value : static::value($value);
     }
 
     /**
@@ -132,6 +134,18 @@ class Cookier extends \ArrayObject
         }
 
         return $cookies;
+    }
+
+    /**
+     * Retrieve a plain text cookie from the request
+     *
+     * @param array|string|null $name
+     * @param mixed $default
+     * @return string|null
+     */
+    public static function getOriginal($name = null, $default = null)
+    {
+        return static::get($name, $default, true);
     }
 
     /**

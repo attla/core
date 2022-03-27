@@ -18,6 +18,7 @@ use Attla\Console\Commands\{
     ViewClearCommand,
     ControllerMakeCommand,
     MiddlewareMakeCommand,
+    MailMakeCommand,
 };
 use Illuminate\Support\ServiceProvider;
 
@@ -48,6 +49,7 @@ class CliServiceProvider extends ServiceProvider
         'ControllerMake' => 'command.controller.make',
         'FactoryMake' => 'command.factory.make',
         'MiddlewareMake' => 'command.middleware.make',
+        'MailMake' => MailMakeCommand::class,
         'ModelMake' => 'command.model.make',
         'SeederMake' => 'command.seeder.make',
         'Serve' => 'command.serve',
@@ -161,6 +163,18 @@ class CliServiceProvider extends ServiceProvider
     {
         $this->app->singleton('command.model.make', function ($app) {
             return new ModelMakeCommand($app['files']);
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerMailMakeCommand()
+    {
+        $this->app->singleton(MailMakeCommand::class, function ($app) {
+            return new MailMakeCommand($app['files']);
         });
     }
 

@@ -56,7 +56,7 @@ class Csrf
         }
 
         return back()->withErrors([
-            'csrf' => $this->translator->get('csrf.failed')
+            'csrf' => $this->translator->get('Session token has expired, please try again.')
         ]);
     }
 

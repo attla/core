@@ -305,6 +305,17 @@ class Cookier extends \ArrayObject
     }
 
     /**
+     * Unqueue a cookie by name
+     *
+     * @param string $name
+     * @return void
+     */
+    public static function unqueue(string $name)
+    {
+        Cookie::unqueue(static::withPrefix($name));
+    }
+
+    /**
      * Determine if the given cookie exists
      *
      * @param string $key

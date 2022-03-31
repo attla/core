@@ -275,7 +275,7 @@ class CliServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the services provided by the provider.
+     * Get the services provided by the provider
      *
      * @return array
      */

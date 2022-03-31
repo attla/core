@@ -80,11 +80,11 @@ class Jwt
     /**
      * Create a JWT with security validations
      *
-     * @param array|\Stdclass $data
+     * @param array|object|\Stdclass $data
      * @param int $ttl
      * @return string
      */
-    public static function sign($data, int $ttl = 1800)
+    public static function sign(array|object $data, int $ttl = 1800)
     {
         return self::encode([
             'ttl' => time() > $ttl ? time() + ($ttl * 60) : $ttl,
@@ -102,6 +102,10 @@ class Jwt
      */
     public static function id($id)
     {
+        if (is_null($id)) {
+            $id = '';
+        }
+
         return self::encode($id);
     }
 
@@ -115,6 +119,10 @@ class Jwt
     {
         if (!$secret) {
             $secret = Encrypter::md5(config('encrypt.secret'));
+        }
+
+        if (is_null($id)) {
+            $id = '';
         }
 
         return self::encode(['k' => $secret], $id);

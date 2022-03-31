@@ -44,10 +44,12 @@ class Csrf
      */
     public function handle($request, \Closure $next)
     {
+        $isExcept = $this->inExceptArray($request);
+
         if (
             $this->isReading($request)
-            or $isExcept = $this->inExceptArray($request)
-            or $this->tokensMatch($request)
+            || $isExcept
+            || $this->tokensMatch($request)
         ) {
             if (!$isExcept) {
                 Cookier::set($this->timeToken(), config('csrf'), 60);

@@ -273,4 +273,17 @@ class CliServiceProvider extends ServiceProvider
             return new ViewClearCommand($app['files']);
         });
     }
+
+    /**
+     * Get the services provided by the provider.
+     *
+     * @return array
+     */
+    public function provides()
+    {
+        return array_merge(
+            array_values($this->commands),
+            array_values($this->devCommands)
+        );
+    }
 }

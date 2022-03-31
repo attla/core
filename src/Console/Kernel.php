@@ -54,10 +54,10 @@ class Kernel implements KernelContract
     protected $commandsLoaded = false;
 
     /**
-     * Create a new console kernel instance
+     * Create a new console kernel instance.
      *
      * @param \Illuminate\Container\Container $app
-     * @param \Illuminate\Contracts\Events\Dispatcher $events
+     * @param  \Illuminate\Contracts\Events\Dispatcher $events
      * @return void
      */
     public function __construct(Container $app, Dispatcher $events)
@@ -68,7 +68,7 @@ class Kernel implements KernelContract
     }
 
     /**
-     * Define the application's command schedule.
+     * Define the application's command schedule
      *
      * @return void
      */
@@ -122,13 +122,12 @@ class Kernel implements KernelContract
      */
     public function terminate($input, $status)
     {
-        $this->app->terminate();
     }
 
     /**
-     * Define the application's command schedule
+     * Define the application's command schedule.
      *
-     * @param \Illuminate\Console\Scheduling\Schedule $schedule
+     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
@@ -137,7 +136,7 @@ class Kernel implements KernelContract
     }
 
     /**
-     * Get the timezone that should be used by default for scheduled events.
+     * Get the timezone that should be used by default for scheduled events
      *
      * @return \DateTimeZone|string|null
      */
@@ -159,14 +158,15 @@ class Kernel implements KernelContract
     }
 
     /**
-     * Register a Closure based command with the application.
+     * Register a Closure based command with the application
      *
      * @param string $signature
      * @param \Closure $callback
-     * @return \Attla\Console\ClosureCommand
+     * @return \Illuminate\Foundation\Console\ClosureCommand
      */
-    public function command($signature, \Closure $callback)
+    public function command($signature, Closure $callback)
     {
+        return;
         $command = new ClosureCommand($signature, $callback);
 
         Artisan::starting(function ($artisan) use ($command) {
@@ -204,8 +204,8 @@ class Kernel implements KernelContract
             );
 
             if (
-                is_subclass_of($command, Command::class) &&
-                ! (new ReflectionClass($command))->isAbstract()
+                is_subclass_of($command, Command::class)
+                && !(new ReflectionClass($command))->isAbstract()
             ) {
                 Artisan::starting(function ($artisan) use ($command) {
                     $artisan->resolve($command);
@@ -251,7 +251,6 @@ class Kernel implements KernelContract
      */
     public function queue($command, array $parameters = [])
     {
-        return QueuedCommand::dispatch(func_get_args());
     }
 
     /**
@@ -285,7 +284,7 @@ class Kernel implements KernelContract
      */
     public function bootstrap()
     {
-        if (! $this->commandsLoaded) {
+        if (!$this->commandsLoaded) {
             $this->commands();
 
             $this->commandsLoaded = true;
@@ -300,8 +299,9 @@ class Kernel implements KernelContract
     protected function getArtisan()
     {
         if (is_null($this->artisan)) {
-            return $this->artisan = (new Artisan($this->app, $this->events, $this->app->version()))
-                                ->resolveCommands($this->commands);
+            $this->artisan = (new Artisan($this->app, $this->events, $this->app->version()))
+                                    ->resolveCommands($this->commands)
+                                    ->setContainerCommandLoader();
         }
 
         return $this->artisan;

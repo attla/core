@@ -87,7 +87,7 @@ class Jwt
     public static function sign($data, int $ttl = 1800)
     {
         return self::encode([
-            'ttl' => time() > $ttl ? time() + $ttl : $ttl,
+            'ttl' => time() > $ttl ? time() + ($ttl * 60) : $ttl,
             'iss' => $_SERVER['HTTP_HOST'],
             'bwr' => browser() . substr(browser_version(), 0, 2),
             'ip' => ip(),

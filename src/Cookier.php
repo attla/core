@@ -79,7 +79,7 @@ class Cookier extends \ArrayObject
      */
     public static function has($name)
     {
-        return !is_null(static::$request->cookie(static::withPrefix($name), null));
+        return !is_null(static::get($name, null, true));
     }
 
     /**
@@ -110,7 +110,8 @@ class Cookier extends \ArrayObject
             return static::all();
         }
 
-        $value = static::$request->cookie(static::withPrefix($name), $default);
+        $value = static::$request->cookie(static::withPrefix($name), $default)
+            ?: static::$request->cookie($name, $default);
 
         return $original ? $value : static::value($value);
     }
@@ -265,8 +266,10 @@ class Cookier extends \ArrayObject
      */
     public static function forget(string $name)
     {
-        $name = static::withPrefix($name);
+        static::$request->cookies->remove($name);
+        Cookie::queue(Cookie::forget($name));
 
+        $name = static::withPrefix($name);
         static::$request->cookies->remove($name);
         Cookie::queue(Cookie::forget($name));
     }

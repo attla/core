@@ -59,4 +59,19 @@ class Builder extends EloquentBuilder
             EncodedId::resolver($update),
         );
     }
+
+    /**
+     * Insert new records into the database
+     *
+     * @param array $values
+     * @return bool
+     */
+    public function insert(array $values)
+    {
+        return $this->forwardCallTo(
+            $this->query,
+            'insert',
+            [EncodedId::resolver($values)]
+        );
+    }
 }

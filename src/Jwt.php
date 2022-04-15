@@ -115,7 +115,7 @@ class Jwt
      * @param mixed $id
      * @return string
      */
-    public function sid($id, $secret = null)
+    public static function sid($id, $secret = null)
     {
         if (!$secret) {
             $secret = Encrypter::md5(config('encrypt.secret'));

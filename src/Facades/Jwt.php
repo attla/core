@@ -5,7 +5,7 @@ namespace Attla\Facades;
 /**
  * @method static string encode(array|\Stdclass $headerOrPayload, array|\Stdclass $payload = null)
  * @method static mixed decode(mixed $jwt, bool $assoc = false)
- * @method static string sign(array|\Stdclass $data, int $ttl = 1800)
+ * @method static string sign(array|\Stdclass $data, int $ttl = 30, array $header = [])
  * @method static string id($id)
  * @method static string sid($id, $secret = null)
  *

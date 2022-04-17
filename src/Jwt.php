@@ -11,7 +11,7 @@ class Jwt
      * @param array|\Stdclass|null $payload
      * @return string
      */
-    public static function encode($headerOrPayload, $payload = null)
+    public static function encode($headerOrPayload, $payload = null): string
     {
         if (is_null($payload)) {
             $payload = $headerOrPayload;
@@ -84,14 +84,20 @@ class Jwt
      * @param int $ttl
      * @return string
      */
-    public static function sign(array|object $data, int $ttl = 1800)
-    {
-        return self::encode([
-            'ttl' => time() > $ttl ? time() + ($ttl * 60) : $ttl,
-            'iss' => $_SERVER['HTTP_HOST'],
-            'bwr' => browser() . substr(browser_version(), 0, 2),
-            'ip' => ip(),
-        ], $data);
+    public static function sign(
+        array|object $data,
+        int $ttl = 30,
+        array $header = []
+    ): string {
+        return self::encode(
+            array_merge([
+                'ttl' => time() > $ttl ? time() + ($ttl * 60) : $ttl,
+                'iss' => $_SERVER['HTTP_HOST'],
+                'bwr' => browser() . substr(browser_version(), 0, 2),
+                'ip' => ip(),
+            ], $header),
+            $data
+        );
     }
 
     /**
@@ -100,7 +106,7 @@ class Jwt
      * @param mixed $id
      * @return string
      */
-    public static function id($id)
+    public static function id($id): string
     {
         if (is_null($id)) {
             $id = '';
@@ -115,7 +121,7 @@ class Jwt
      * @param mixed $id
      * @return string
      */
-    public static function sid($id, $secret = null)
+    public static function sid($id, $secret = null): string
     {
         if (!$secret) {
             $secret = Encrypter::md5(config('encrypt.secret'));

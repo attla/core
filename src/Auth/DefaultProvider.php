@@ -7,7 +7,6 @@ use Attla\Cookier;
 use App\Models\User;
 use Attla\Encrypter;
 use Attla\Application;
-use Illuminate\Support\Str;
 use Illuminate\Contracts\Auth\Authenticatable;
 
 class DefaultProvider implements GuardInterface
@@ -27,7 +26,7 @@ class DefaultProvider implements GuardInterface
      *
      * @var string
      */
-    protected $identifier;
+    protected $identifier = 'id';
 
     /**
      * Create a new authentication
@@ -48,36 +47,78 @@ class DefaultProvider implements GuardInterface
      * @param bool $returnSign
      * @return bool
      */
-    public function attempt(array $credentials = [], int $remember = 1800, bool $returnSign = false)
+    public function attempt(array $credentials = [], int $remember = 30, bool $returnSign = false)
     {
-        $credentials = $this->validateCredentials($credentials);
-
-        if (!$credentials && !$credentials = $this->validateCredentials($this->getRequestCredentials())) {
-            return false;
-        }
-
-        $user = $this->findUserByIdentifier($credentials);
-
-        if (!is_null($user) && $this->checkCredentials($user, $credentials)) {
-            auth()->setUser($user);
-            $sign = $this->createSign($user, $remember);
+        if (!is_null($user = $this->retrieveByCredentials($credentials))) {
+            $sign = $this->login($user, $remember);
 
             return $returnSign ? $sign : true;
-        } else {
-            return false;
         }
+
+        return false;
+    }
+
+    /**
+     * Log a user into the application without sessions or cookies
+     *
+     * @param array $credentials
+     * @return bool
+     */
+    public function once(array $credentials = [])
+    {
+        if (!is_null($user = $this->retrieveByCredentials($credentials))) {
+            auth()->setUser($user);
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Generate a token for a given user
      *
      * @param Authenticatable $user
+     * @param int $remember
      * @return mixed
      */
-    public function fromUser(Authenticatable $user, int $remember = 1800)
+    public function login(Authenticatable $user, int $remember = 30)
     {
         auth()->setUser($user);
         return $this->createSign($user, $remember);
+    }
+
+    /**
+     * Log the given user ID into the application
+     *
+     * @param mixed $id
+     * @param int $remember
+     * @return mixed
+     */
+    public function loginUsingId($id, int $remember = 30, bool $returnSign = false)
+    {
+        if (!is_null($user = User::find($id))) {
+            $sign = $this->login($user, $remember);
+
+            return $returnSign ? $sign : true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Log the given user ID into the application without sessions or cookies
+     *
+     * @param mixed $id
+     * @return mixed
+     */
+    public function onceUsingId($id)
+    {
+        if (!is_null($user = User::find($id))) {
+            auth()->setUser($user);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -89,7 +130,7 @@ class DefaultProvider implements GuardInterface
     {
         $user = null;
 
-        if (is_object($sign = Cookier::get('sign') ?: $this->bearerToken())) {
+        if (is_object($sign = Cookier::get('sign') ?: Jwt::decode($this->request->bearerToken()))) {
             $user = new User((array) $sign);
             $user->exists = true;
         }
@@ -105,6 +146,26 @@ class DefaultProvider implements GuardInterface
     public function logout()
     {
         Cookier::forget('sign');
+    }
+
+    /**
+     * Retrieve a user by the given credentials
+     *
+     * @param array $credentials
+     * @return \Illuminate\Contracts\Auth\Authenticatable|null
+     */
+    public function retrieveByCredentials(array $credentials)
+    {
+        if (
+            $this->checkCredentials($user = $this->findUserByIdentifier(
+                $credentials = $this->validateCredentials($credentials)
+                    ?: []
+            ), $credentials)
+        ) {
+            return $user;
+        }
+
+        return null;
     }
 
     /**
@@ -125,16 +186,6 @@ class DefaultProvider implements GuardInterface
             $identifier => $credentials[$identifier],
             'password' => $credentials['password']
         ];
-    }
-
-    /**
-     * Get credentials from request
-     *
-     * @return array
-     */
-    protected function getRequestCredentials()
-    {
-        return $this->request->only('email', 'user', 'username', 'password');
     }
 
     /**
@@ -162,7 +213,10 @@ class DefaultProvider implements GuardInterface
      */
     protected function findUserByIdentifier(array $credentials)
     {
-        if ($user = User::where($this->identifier, $credentials[$this->identifier])->first()) {
+        if (
+            !empty($credentials[$this->identifier])
+            && $user = User::where($this->identifier, $credentials[$this->identifier])->first()
+        ) {
             return $user;
         }
 
@@ -202,7 +256,7 @@ class DefaultProvider implements GuardInterface
      * @param bool $returnSign
      * @return Authenticatable|string|false
      */
-    public function renewSign(int $remember = 1800, bool $returnSign = false)
+    public function renewSign(int $remember = 30, bool $returnSign = false)
     {
         if (!is_null($this->user) and $user = User::find($this->user->id)) {
             $sign = $this->createSign($user, $remember);
@@ -210,21 +264,5 @@ class DefaultProvider implements GuardInterface
         }
 
         return false;
-    }
-
-    /**
-     * Get the bearer token from the request headers
-     *
-     * @return string
-     */
-    protected function bearerToken()
-    {
-        $token = $this->request->header('Authorization', '');
-
-        if (Str::startsWith($token, 'Bearer ')) {
-            $token = Str::substr($token, 7);
-        }
-
-        return $token;
     }
 }

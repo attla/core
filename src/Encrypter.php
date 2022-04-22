@@ -92,13 +92,13 @@ class Encrypter
     }
 
     /**
-     * Cypher a string
+     * Cipher a string
      *
      * @param string $str
      * @param string $key
      * @return string
      */
-    protected static function cypher($str, $key)
+    protected static function cipher($str, $key)
     {
         $key = $key ?: self::getSecret();
 
@@ -135,7 +135,7 @@ class Encrypter
             $data = self::toText($data);
         }
 
-        return self::urlsafeB64Encode(self::cypher($data, $key));
+        return self::urlsafeB64Encode(self::cipher($data, $key));
     }
 
     /**
@@ -148,7 +148,7 @@ class Encrypter
      */
     public static function decode($data, string $key = '', bool $assoc = false)
     {
-        if ($result = self::cypher(self::urlsafeB64Decode($data), $key)) {
+        if ($result = self::cipher(self::urlsafeB64Decode($data), $key)) {
             if (is_json($result)) {
                 $result = json_decode($result, $assoc);
             } elseif (is_serialized($result)) {

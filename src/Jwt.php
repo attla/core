@@ -9,10 +9,14 @@ class Jwt
      *
      * @param array|\Stdclass $headerOrPayload
      * @param array|\Stdclass|null $payload
+     * @param string $secret
      * @return string
      */
-    public static function encode($headerOrPayload, $payload = null): string
-    {
+    public static function encode(
+        $headerOrPayload,
+        $payload = null,
+        string $secret = ''
+    ): string {
         if (is_null($payload)) {
             $payload = $headerOrPayload;
             $header = [];
@@ -25,9 +29,9 @@ class Jwt
         }
 
         $payload = Encrypter::encode($payload, $header['k']);
-        $header = Encrypter::encode($header);
+        $header = Encrypter::encode($header, $secret);
 
-        return $header . '_' . $payload . '_' . Encrypter::md5($header . $payload);
+        return $header . '_' . $payload . '_' . Encrypter::md5($header . $payload, $secret);
     }
 
     /**
@@ -35,9 +39,10 @@ class Jwt
      *
      * @param string $jwt
      * @param bool $assoc
+     * @param string $secret
      * @return mixed
      */
-    public static function decode($jwt, bool $assoc = false)
+    public static function decode($jwt, bool $assoc = false, string $secret = '')
     {
         if (!$jwt || !is_string($jwt)) {
             return false;
@@ -45,12 +50,12 @@ class Jwt
 
         $jwt = explode('_', $jwt);
 
-        if (count($jwt) != 3 || $jwt[2] != Encrypter::md5($jwt[0] . $jwt[1])) {
+        if (count($jwt) != 3 || $jwt[2] != Encrypter::md5($jwt[0] . $jwt[1], $secret)) {
             return false;
         }
 
         if (
-            $header = Encrypter::decode($jwt[0])
+            $header = Encrypter::decode($jwt[0], $secret)
             and is_object($header)
             and $payload = Encrypter::decode($jwt[1], $header->k, $assoc)
             and $payload
@@ -82,12 +87,15 @@ class Jwt
      *
      * @param array|object|\Stdclass $data
      * @param int $ttl
+     * @param array $header
+     * @param string $secret
      * @return string
      */
     public static function sign(
         array|object $data,
         int $ttl = 30,
-        array $header = []
+        array $header = [],
+        string $secret = ''
     ): string {
         return self::encode(
             array_merge([
@@ -96,7 +104,8 @@ class Jwt
                 'bwr' => browser() . substr(browser_version(), 0, 2),
                 'ip' => ip(),
             ], $header),
-            $data
+            $data,
+            $secret
         );
     }
 
@@ -104,33 +113,33 @@ class Jwt
      * Generate a unique identifier of anything
      *
      * @param mixed $id
+     * @param string $secret
      * @return string
      */
-    public static function id($id): string
+    public static function id($id, string $secret = ''): string
     {
         if (is_null($id)) {
             $id = '';
         }
 
-        return self::encode($id);
+        return self::encode($id, null, $secret);
     }
 
     /**
      * Generate a unique identifier by secret
      *
      * @param mixed $id
+     * @param string $secret
      * @return string
      */
-    public static function sid($id, $secret = null): string
+    public static function sid($id, string $secret = ''): string
     {
-        if (!$secret) {
-            $secret = Encrypter::md5(config('encrypt.secret'));
-        }
-
         if (is_null($id)) {
             $id = '';
         }
 
-        return self::encode(['k' => $secret], $id);
+        return self::encode([
+            'k' => Encrypter::md5($secret),
+        ], $id, $secret);
     }
 }

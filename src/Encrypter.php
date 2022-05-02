@@ -95,14 +95,14 @@ class Encrypter
      * Cipher a string
      *
      * @param string $str
-     * @param string $key
+     * @param string $secret
      * @return string
      */
-    protected static function cipher($str, $key)
+    protected static function cipher($str, $secret)
     {
-        $key = $key ?: self::getSecret();
+        $secret = $secret ?: self::getSecret();
 
-        if (!$str || !$key) {
+        if (!$str || !$secret) {
             return '';
         }
 
@@ -113,10 +113,10 @@ class Encrypter
         $result = '';
 
         $dataLength = strlen($str) - 1;
-        $keyLenght = strlen($key) - 1;
+        $secretLenght = strlen($secret) - 1;
 
         do {
-            $result .= $str[$dataLength] ^ $key[$dataLength % $keyLenght];
+            $result .= $str[$dataLength] ^ $secret[$dataLength % $secretLenght];
         } while ($dataLength--);
 
         return strrev($result);
@@ -126,29 +126,29 @@ class Encrypter
      * Encrypt a anyting with secret key
      *
      * @param mixed $data
-     * @param string $key
+     * @param string $secret
      * @return string
      */
-    public static function encode($data, string $key = '')
+    public static function encode($data, string $secret = '')
     {
         if (is_array($data) || is_object($data)) {
             $data = self::toText($data);
         }
 
-        return self::urlsafeB64Encode(self::cipher($data, $key));
+        return self::urlsafeB64Encode(self::cipher($data, $secret));
     }
 
     /**
      * Decrypt a anyting with secret key
      *
      * @param mixed $data
-     * @param string $key
+     * @param string $secret
      * @param bool $assoc
      * @return mixed
      */
-    public static function decode($data, string $key = '', bool $assoc = false)
+    public static function decode($data, string $secret = '', bool $assoc = false)
     {
-        if ($result = self::cipher(self::urlsafeB64Decode($data), $key)) {
+        if ($result = self::cipher(self::urlsafeB64Decode($data), $secret)) {
             if (is_json($result)) {
                 $result = json_decode($result, $assoc);
             } elseif (is_serialized($result)) {
@@ -198,10 +198,11 @@ class Encrypter
      * Encrypt an md5 in bytes of a string
      *
      * @param string $str
+     * @param string $secret
      * @return string
      */
-    public static function md5($str)
+    public static function md5($str, string $secret = '')
     {
-        return self::encode(md5((string) $str, true));
+        return self::encode(md5((string) $str, true), $secret);
     }
 }

@@ -566,7 +566,7 @@ function asset($file, $defaultFile = false)
         $defaultFilePath = assetPath($defaultFile);
     }
 
-    $version = app()->version();
+    $version = config('version') ?? app()->version();
 
     if (!$version) {
         $version = '0.0.0';

@@ -2,6 +2,9 @@
 
 namespace Attla\Database;
 
+use Illuminate\Support\Enumerable;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 abstract class Eloquent extends EloquentModel
@@ -23,11 +26,16 @@ abstract class Eloquent extends EloquentModel
     {
         Encapsulator::getInstance();
 
-        if (
-            is_object($attributes)
-            && method_exists($attributes, 'toArray')
-        ) {
+        if ($attributes instanceof Enumerable) {
+            $attributes = $attributes->all();
+        } elseif ($attributes instanceof Arrayable) {
             $attributes = $attributes->toArray();
+        } elseif ($attributes instanceof Jsonable) {
+            $attributes = json_decode($value->toJson(), true);
+        } elseif ($attributes instanceof \JsonSerializable) {
+            $attributes = (array) $attributes->jsonSerialize();
+        } elseif ($attributes instanceof \Traversable) {
+            $attributes = iterator_to_array($attributes);
         } elseif (!is_array($attributes)) {
             $attributes = (array) $attributes;
         }

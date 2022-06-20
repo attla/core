@@ -3,13 +3,23 @@
 namespace Attla\Facades;
 
 /**
- * @method static string encode(array|\Stdclass $headerOrPayload, array|\Stdclass $payload = null)
- * @method static mixed decode(mixed $jwt, bool $assoc = false)
- * @method static string sign(array|\Stdclass $data, int $ttl = 30, array $header = [])
- * @method static string id($id)
- * @method static string sid($id, $secret = null)
+ * @method static string encode()
+ * @method static mixed decode(string $jwt, bool $assoc = false)
+ * @method static mixed fromString(string $jwt, bool $assoc = false)
+ * @method static mixed parseString(string $jwt, bool $assoc = false)
+ * @method static mixed parse(string $jwt, bool $assoc = false)
+ * @method static self payload($value)
+ * @method static self secret(string $secret)
+ * @method static self same(string $entropy)
+ * @method static self exp(int|CarbonInterface $exp = 30)
+ * @method static self iss()
+ * @method static self bwr()
+ * @method static self ip()
+ * @method static self sign(int|CarbonInterface $exp = 30)
+ * @method static string id($value)
+ * @method static string sid($value)
  *
- * @see \Attla\Jwt
+ * @see \Attla\JwtFactory
  */
 class Jwt extends \Illuminate\Support\Facades\Facade
 {

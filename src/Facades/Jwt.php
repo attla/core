@@ -12,7 +12,7 @@ namespace Attla\Facades;
  * @method static self secret(string $secret)
  * @method static self same(string $entropy)
  * @method static self exp(int|CarbonInterface $exp = 30)
- * @method static self iss()
+ * @method static self iss(string $value = '')
  * @method static self bwr()
  * @method static self ip()
  * @method static self sign(int|CarbonInterface $exp = 30)

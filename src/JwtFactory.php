@@ -66,8 +66,12 @@ class JwtFactory
      * @param bool $assoc
      * @return mixed
      */
-    public function decode(string $jwt, bool $assoc = false): mixed
+    public function decode($jwt, bool $assoc = false): mixed
     {
+        if (!$jwt || !is_string($jwt)) {
+            return false;
+        }
+
         $jwt = explode('_', $jwt);
         if (count($jwt) != 3) {
             return false;
@@ -196,9 +200,9 @@ class JwtFactory
      *
      * @return self
      */
-    public function iss(): self
+    public function iss(string $value = ''): self
     {
-        $this->header['iss'] = $_SERVER['HTTP_HOST'];
+        $this->header['iss'] = $value ?: $_SERVER['HTTP_HOST'];
         return $this;
     }
 

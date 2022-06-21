@@ -120,7 +120,7 @@ class JwtFactory
     }
 
     /**
-     * Alias for decode
+     * Alias of decode
      *
      * @param string $jwt
      * @param bool $assoc
@@ -132,7 +132,7 @@ class JwtFactory
     }
 
     /**
-     * Alias for decode
+     * Alias of decode
      *
      * @param string $jwt
      * @param bool $assoc
@@ -144,7 +144,7 @@ class JwtFactory
     }
 
     /**
-     * Alias for decode
+     * Alias of decode
      *
      * @param string $jwt
      * @param bool $assoc
@@ -165,6 +165,17 @@ class JwtFactory
     {
         $this->payload = $this->primitiveOrArray($value);
         return $this;
+    }
+
+    /**
+     * Alias of payload
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    public function body($value): self
+    {
+        return $this->payload($value);
     }
 
     /**

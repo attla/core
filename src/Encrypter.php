@@ -11,7 +11,7 @@ class Encrypter
      * @param string $salt
      * @return string
      */
-    public static function hash($password, $salt = '')
+    public static function hash(string $password, string $salt = ''): string
     {
         if ($salt) {
             $saltLength = strlen($salt);
@@ -42,7 +42,7 @@ class Encrypter
      * @param int $length Optionally, a length of bytes to use
      * @return string
      */
-    public static function generateKey($length = 32)
+    public static function generateKey(int $length = 32): string
     {
         return bin2hex(random_bytes($length));
     }
@@ -54,7 +54,7 @@ class Encrypter
      * @param string $encrypted
      * @return bool
      */
-    public static function hashEquals($unencrypted, $encrypted)
+    public static function hashEquals(string $unencrypted, string $encrypted)
     {
         return hash_equals($encrypted, self::hash($unencrypted, $encrypted));
     }
@@ -65,7 +65,7 @@ class Encrypter
      * @param array|object $item
      * @return string
      */
-    public static function toText($item)
+    public static function toText($item): string
     {
         $mode = config('encrypt.mode');
         if (!in_array($mode, ['query', 'json', 'serialize'])) {
@@ -82,10 +82,10 @@ class Encrypter
      *
      * @throws \Exception
      */
-    public static function getSecret()
+    public static function getSecret(): string
     {
         if ($secret = config('encrypt.secret')) {
-            return $secret;
+            return (string) $secret;
         }
 
         throw new \Exception('Encrypt secret key config not found.');
@@ -129,7 +129,7 @@ class Encrypter
      * @param string $secret
      * @return string
      */
-    public static function encode($data, string $secret = '')
+    public static function encode($data, string $secret = ''): string
     {
         if (is_array($data) || is_object($data)) {
             $data = self::toText($data);
@@ -171,7 +171,7 @@ class Encrypter
      * @param string $input The string you want encoded
      * @return string The base64 encode of what you passed in
      */
-    public static function urlsafeB64Encode($data)
+    public static function urlsafeB64Encode(string $data): string
     {
         return str_replace('=', '', strtr(base64_encode($data), '+/', '-.'));
     }
@@ -182,7 +182,7 @@ class Encrypter
      * @param string $data A Base64 encoded string
      * @return string A decoded string
      */
-    public static function urlsafeB64Decode($data)
+    public static function urlsafeB64Decode(string $data): string
     {
         $remainder = strlen($data) % 4;
 
@@ -197,11 +197,11 @@ class Encrypter
     /**
      * Encrypt an md5 in bytes of a string
      *
-     * @param string $str
+     * @param mixed $str
      * @param string $secret
      * @return string
      */
-    public static function md5($str, string $secret = '')
+    public static function md5($str, string $secret = ''): string
     {
         return self::encode(md5((string) $str, true), $secret);
     }

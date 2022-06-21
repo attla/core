@@ -26,7 +26,7 @@ class Encrypter
             }
 
             do {
-                $salt = substr(self::generateKey(24), 0, $length);
+                $salt = substr(static::generateKey(24), 0, $length);
             } while (!$salt);
 
             $saltLength = strlen($salt);
@@ -56,7 +56,7 @@ class Encrypter
      */
     public static function hashEquals(string $unencrypted, string $encrypted)
     {
-        return hash_equals($encrypted, self::hash($unencrypted, $encrypted));
+        return hash_equals($encrypted, static::hash($unencrypted, $encrypted));
     }
 
     /**
@@ -100,7 +100,7 @@ class Encrypter
      */
     protected static function cipher($str, $secret)
     {
-        $secret = $secret ?: self::getSecret();
+        $secret = $secret ?: static::getSecret();
 
         if (!$str || !$secret) {
             return '';
@@ -132,10 +132,10 @@ class Encrypter
     public static function encode($data, string $secret = ''): string
     {
         if (is_array($data) || is_object($data)) {
-            $data = self::toText($data);
+            $data = static::toText($data);
         }
 
-        return self::urlsafeB64Encode(self::cipher($data, $secret));
+        return static::urlsafeB64Encode(static::cipher($data, $secret));
     }
 
     /**
@@ -148,7 +148,7 @@ class Encrypter
      */
     public static function decode($data, string $secret = '', bool $assoc = false)
     {
-        if ($result = self::cipher(self::urlsafeB64Decode($data), $secret)) {
+        if ($result = static::cipher(static::urlsafeB64Decode($data), $secret)) {
             if (is_json($result)) {
                 $result = json_decode($result, $assoc);
             } elseif (is_serialized($result)) {
@@ -203,6 +203,6 @@ class Encrypter
      */
     public static function md5($str, string $secret = ''): string
     {
-        return self::encode(md5((string) $str, true), $secret);
+        return static::encode(md5((string) $str, true), $secret);
     }
 }

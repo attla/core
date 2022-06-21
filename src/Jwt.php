@@ -44,7 +44,7 @@ class Jwt
     {
         if (!method_exists($this->factory, $name)) {
             throw new \BadMethodCallException(
-                sprintf("The method '%s' doesn't exists in '%s' Jwt Class", $name)
+                sprintf("The method '%s' doesn't exists in Jwt Class", $name)
             );
         }
 

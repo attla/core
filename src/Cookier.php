@@ -39,7 +39,7 @@ class Cookier extends \ArrayObject
      * @param string $key
      * @return string
      */
-    public static function withPrefix(string $name)
+    public static function withPrefix(string $name): string
     {
         $name = Str::slug($name, '_');
 
@@ -56,7 +56,7 @@ class Cookier extends \ArrayObject
      * @param string $prefix
      * @return void
      */
-    public static function setPrefix(string $prefix)
+    public static function setPrefix(string $prefix): void
     {
         static::$prefix = $prefix;
     }
@@ -66,7 +66,7 @@ class Cookier extends \ArrayObject
      *
      * @return string
      */
-    public static function prefix()
+    public static function prefix(): string
     {
         return static::$prefix;
     }
@@ -77,7 +77,7 @@ class Cookier extends \ArrayObject
      * @param string $name
      * @return bool
      */
-    public static function has($name)
+    public static function has(string $name): bool
     {
         return !is_null(static::get($name, null, true));
     }
@@ -86,9 +86,9 @@ class Cookier extends \ArrayObject
      * Alias for has
      *
      * @param string $name
-     * @return void
+     * @return bool
      */
-    public static function exists($name)
+    public static function exists(string $name): bool
     {
         return static::has($name);
     }
@@ -98,7 +98,7 @@ class Cookier extends \ArrayObject
      *
      * @param array|string|null $name
      * @param mixed $default
-     * @return string|array|null
+     * @return mixed
      */
     public static function get($name = null, $default = null, $original = false)
     {
@@ -122,7 +122,7 @@ class Cookier extends \ArrayObject
      * @param array $keys
      * @return array
      */
-    public static function getMany($keys)
+    public static function getMany(array $keys): array
     {
         $cookies = [];
 
@@ -229,10 +229,16 @@ class Cookier extends \ArrayObject
     /**
      * Alias for set
      *
-     * @param string $key
+     * @param string $name
      * @param string $value
-     * @param integer $ttl
-     * @return void
+     * @param int $minutes
+     * @param string|null $path
+     * @param string|null $domain
+     * @param bool|null $secure
+     * @param bool $httpOnly
+     * @param bool $raw
+     * @param string|null $sameSite
+     * @return \Illuminate\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
      */
     public static function store(
         $name,

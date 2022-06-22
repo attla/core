@@ -2,6 +2,8 @@
 
 namespace Attla;
 
+use Illuminate\Support\Str;
+
 class Encrypter
 {
     /**
@@ -149,7 +151,7 @@ class Encrypter
     public static function decode($data, string $secret = '', bool $assoc = false)
     {
         if ($result = static::cipher(static::urlsafeB64Decode($data), $secret)) {
-            if (is_json($result)) {
+            if (Str::isJson($result)) {
                 $result = json_decode($result, $assoc);
             } elseif (is_serialized($result)) {
                 $result = unserialize($result);

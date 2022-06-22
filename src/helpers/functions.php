@@ -1015,18 +1015,6 @@ function is_base64($data)
 }
 
 /**
- * Check if it is a valid json
- *
- * @param string $data
- * @return bool
- */
-function is_json($data)
-{
-    json_decode($data);
-    return json_last_error() == JSON_ERROR_NONE;
-}
-
-/**
  * Check if it is a valid http_query
  *
  * @param string $data

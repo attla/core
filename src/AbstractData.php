@@ -148,7 +148,7 @@ trait AbstractData
         $destinationReflection = new \ReflectionObject($destination);
 
         foreach ($data as $name => $value) {
-            if ($destinationReflection->hasProperty($name)) {
+            if (!is_numeric($name) && $destinationReflection->hasProperty($name)) {
                 $destinationReflection->getProperty($name)
                     ->setValue($destination, $value);
             }

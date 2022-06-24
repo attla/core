@@ -17,13 +17,27 @@ trait AbstractData
     /**
      * Initialize the data transfer object
      *
+     * @var array $data
      * @return void
      */
-    protected function init()
+    protected function init(array $data = [])
     {
-        foreach (Arr::except(get_object_vars($this), ['dtoData']) as $name => $value) {
-            $this->set($name, $value);
-            unset($this->{$name});
+        foreach (
+            Arr::except(
+                array_merge(
+                    get_object_vars($this),
+                    $data
+                ),
+                ['dtoData']
+            ) as $name => $value
+        ) {
+            if (!is_numeric($name)) {
+                $this->set($name, $value);
+
+                if (property_exists($this, $name)) {
+                    unset($this->{$name});
+                }
+            }
         }
     }
 
@@ -256,11 +270,12 @@ trait AbstractData
     /**
      * Create a new DTO instance
      *
+     * @var array $data
      * @return void
      */
-    public function __construct()
+    public function __construct(array $data = [])
     {
-        $this->init();
+        $this->init($data);
     }
 
     /**

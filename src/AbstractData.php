@@ -4,6 +4,9 @@ namespace Attla;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Enumerable;
+use Illuminate\Contracts\Support\Jsonable;
+use Illuminate\Contracts\Support\Arrayable;
 
 trait AbstractData
 {
@@ -15,30 +18,111 @@ trait AbstractData
     protected $dtoData = [];
 
     /**
-     * Initialize the data transfer object
+     * Get all properties from object
      *
-     * @var array $data
+     * @var object $object
+     * @return array
+     */
+    private function getProperties(object $object)
+    {
+        $properties = [];
+        $reflection = new \ReflectionObject($object);
+
+        do {
+            $properties = array_merge($properties, $reflection->getProperties());
+        } while ($reflection = $reflection->getParentClass());
+
+        foreach ($properties as $key => $property) {
+            $property->setAccessible(true);
+            $properties[$property->getName()] = $property->getValue($object);
+            unset($properties[$key]);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * Map properties from source to destination
+     *
+     * @var object $source
+     * @var object $destination
      * @return void
      */
-    protected function init(array $data = [])
-    {
-        foreach (
-            Arr::except(
-                array_merge(
-                    get_object_vars($this),
-                    $data
-                ),
-                ['dtoData']
-            ) as $name => $value
-        ) {
-            if (!is_numeric($name)) {
-                $this->set($name, $value);
+    private function mapProperties(
+        object $source,
+        object $destination
+    ) {
+        $this->setProperties(
+            $destination,
+            array_merge(
+                $this->getProperties($destination),
+                $this->getProperties($this->getDataFromSource($source))
+            )
+        );
+    }
 
-                if (property_exists($this, $name)) {
-                    unset($this->{$name});
-                }
+    /**
+     * get data from source
+     *
+     * @param mixed $value
+     * @return object
+     */
+    private function getDataFromSource($value)
+    {
+        if (is_object($value)) {
+            return $value;
+        } elseif ($value instanceof Enumerable) {
+            $value = $value->all();
+        } elseif ($value instanceof Arrayable) {
+            $value = $value->toArray();
+        } elseif ($value instanceof Jsonable) {
+            $value = json_decode($value->toJson(), true);
+        } elseif ($value instanceof \JsonSerializable) {
+            $value = (array) $value->jsonSerialize();
+        } elseif ($value instanceof \Traversable) {
+            $value = iterator_to_array($value);
+        }
+
+        return (object) $value;
+    }
+
+    /**
+     * Set properties to destination
+     *
+     * @var object $destination
+     * @var array $properties
+     * @return void
+     */
+    private function setProperties(
+        object $destination,
+        array $properties = []
+    ) {
+        $destinationReflection = new \ReflectionObject($destination);
+        foreach ($properties as $name => $value) {
+            if (
+                !is_numeric($name)
+                && $name != 'dtoData'
+                && $destinationReflection->hasProperty($name)
+            ) {
+                $prop = $destinationReflection->getProperty($name);
+                $prop->setAccessible(true);
+                $destination->set($name, $value);
             }
         }
+    }
+
+    /**
+     * Initialize the data transfer object
+     *
+     * @var object|array $data
+     * @return void
+     */
+    protected function init(object|array $source = [])
+    {
+        $this->mapProperties(
+            is_array($source) ? (object) $source : $source,
+            $this
+        );
     }
 
     /**
@@ -128,47 +212,14 @@ trait AbstractData
     }
 
     /**
-     * Create new instance from other object
+     * Create new instance from other source
      *
-     * @param object $instance
+     * @param object|array $source
      * @return static
      */
-    public static function from(object $instance): static
+    public static function from(object|array $source): static
     {
-        $destination = new static();
-        $destinationReflection = new \ReflectionObject($destination);
-
-        foreach ((new \ReflectionObject($instance))->getProperties() as $sourceProperty) {
-            $value = $sourceProperty->getValue($instance);
-
-            if ($destinationReflection->hasProperty($name = $sourceProperty->getName())) {
-                $destinationReflection->getProperty($name)
-                    ->setValue($destination, $value);
-            }
-        }
-
-        return $destination;
-    }
-
-    /**
-     * Create new instance from array of properties
-     *
-     * @param array $data
-     * @return static
-     */
-    public static function fromArray(array $data): static
-    {
-        $destination = new static();
-        $destinationReflection = new \ReflectionObject($destination);
-
-        foreach ($data as $name => $value) {
-            if (!is_numeric($name) && $destinationReflection->hasProperty($name)) {
-                $destinationReflection->getProperty($name)
-                    ->setValue($destination, $value);
-            }
-        }
-
-        return $destination;
+        return new static($source);
     }
 
     /**
@@ -270,12 +321,12 @@ trait AbstractData
     /**
      * Create a new DTO instance
      *
-     * @var array $data
+     * @var object|array $source
      * @return void
      */
-    public function __construct(array $data = [])
+    public function __construct(object|array $source = [])
     {
-        $this->init($data);
+        $this->init($source);
     }
 
     /**

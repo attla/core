@@ -2,7 +2,6 @@
 
 namespace Attla;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Enumerable;
 use Illuminate\Contracts\Support\Jsonable;
@@ -42,26 +41,6 @@ trait AbstractData
     }
 
     /**
-     * Map properties from source to destination
-     *
-     * @var object $source
-     * @var object $destination
-     * @return void
-     */
-    private function mapProperties(
-        object $source,
-        object $destination
-    ) {
-        $this->setProperties(
-            $destination,
-            array_merge(
-                $this->getProperties($destination),
-                $this->getProperties($this->getDataFromSource($source))
-            )
-        );
-    }
-
-    /**
      * get data from source
      *
      * @param mixed $value
@@ -97,18 +76,34 @@ trait AbstractData
         object $destination,
         array $properties = []
     ) {
-        $destinationReflection = new \ReflectionObject($destination);
         foreach ($properties as $name => $value) {
             if (
                 !is_numeric($name)
                 && $name != 'dtoData'
-                && $destinationReflection->hasProperty($name)
             ) {
-                $prop = $destinationReflection->getProperty($name);
-                $prop->setAccessible(true);
                 $destination->set($name, $value);
             }
         }
+    }
+
+    /**
+     * Map properties from source to destination
+     *
+     * @var object $source
+     * @var object $destination
+     * @return void
+     */
+    private function mapProperties(
+        object $source,
+        object $destination
+    ) {
+        $this->setProperties(
+            $destination,
+            array_merge(
+                $this->getProperties($destination),
+                $this->getProperties($this->getDataFromSource($source))
+            )
+        );
     }
 
     /**

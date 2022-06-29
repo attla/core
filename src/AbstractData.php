@@ -33,7 +33,9 @@ trait AbstractData
 
         foreach ($properties as $key => $property) {
             $property->setAccessible(true);
-            $properties[$property->getName()] = $property->getValue($object);
+            $properties[$property->getName()] = $property->isInitialized($object)
+                ? $property->getValue($object)
+                : null;
             unset($properties[$key]);
         }
 
@@ -82,6 +84,7 @@ trait AbstractData
                 && $name != 'dtoData'
             ) {
                 $destination->set($name, $value);
+                unset($this->{$name});
             }
         }
     }

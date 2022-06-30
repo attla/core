@@ -197,7 +197,7 @@ class Cookier extends \ArrayObject
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \Illuminate\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
     public static function set(
         $name,
@@ -213,7 +213,7 @@ class Cookier extends \ArrayObject
         $name = static::withPrefix($name);
         static::$request->cookies->set($name, $value);
 
-        return Cookie::queue(
+        Cookie::queue($cookie = Cookie::make(
             $name,
             $value,
             $minutes,
@@ -223,7 +223,8 @@ class Cookier extends \ArrayObject
             $httpOnly,
             $raw,
             $sameSite
-        );
+        ));
+        return $cookie;
     }
 
     /**
@@ -238,7 +239,7 @@ class Cookier extends \ArrayObject
      * @param bool $httpOnly
      * @param bool $raw
      * @param string|null $sameSite
-     * @return \Illuminate\Cookie\CookieJar|\Symfony\Component\HttpFoundation\Cookie
+     * @return \Symfony\Component\HttpFoundation\Cookie
      */
     public static function store(
         $name,
@@ -265,63 +266,133 @@ class Cookier extends \ArrayObject
     }
 
     /**
+     * Create a cookie that lasts "forever" (five years)
+     *
+     * @param string $name
+     * @param string $value
+     * @param string|null $path
+     * @param string|null $domain
+     * @param bool|null $secure
+     * @param bool $httpOnly
+     * @param bool $raw
+     * @param string|null $sameSite
+     * @return \Symfony\Component\HttpFoundation\Cookie
+     */
+    public static function forever(
+        $name,
+        $value,
+        $path = null,
+        $domain = null,
+        $secure = null,
+        $httpOnly = true,
+        $raw = false,
+        $sameSite = null
+    ) {
+        return static::set(
+            $name,
+            $value,
+            2628000,
+            $path,
+            $domain,
+            $secure,
+            $httpOnly,
+            $raw,
+            $sameSite
+        );
+    }
+
+    /**
      * Forget a cookie by name
      *
      * @param string $name
+     * @param string|null $path
+     * @param string|null $domain
      * @return void
      */
-    public static function forget(string $name)
+    public static function forget(string $name, $path = null, $domain = null)
     {
         static::$request->cookies->remove($name);
-        Cookie::queue(Cookie::forget($name));
+        Cookie::queue(Cookie::forget($name, $path, $domain));
 
         $name = static::withPrefix($name);
         static::$request->cookies->remove($name);
-        Cookie::queue(Cookie::forget($name));
+        Cookie::queue(Cookie::forget($name, $path, $domain));
     }
 
     /**
      * Alias for forget
      *
      * @param string $name
+     * @param string|null $path
+     * @param string|null $domain
      * @return void
      */
-    public static function delete(string $name)
+    public static function delete(string $name, $path = null, $domain = null)
     {
-        static::forget($name);
+        static::forget($name, $path, $domain);
     }
 
     /**
      * Alias for forget
      *
      * @param string $name
+     * @param string|null $path
+     * @param string|null $domain
      * @return void
      */
-    public static function unset(string $name)
+    public static function unset(string $name, $path = null, $domain = null)
     {
-        static::forget($name);
+        static::forget($name, $path, $domain);
     }
 
     /**
      * Alias for forget
      *
      * @param string $name
+     * @param string|null $path
+     * @param string|null $domain
      * @return void
      */
-    public static function destroy(string $name)
+    public static function expire(string $name, $path = null, $domain = null)
     {
-        static::forget($name);
+        static::forget($name, $path, $domain);
+    }
+
+    /**
+     * Alias for forget
+     *
+     * @param string $name
+     * @param string|null $path
+     * @param string|null $domain
+     * @return void
+     */
+    public static function destroy(string $name, $path = null, $domain = null)
+    {
+        static::forget($name, $path, $domain);
     }
 
     /**
      * Unqueue a cookie by name
      *
      * @param string $name
+     * @param string|null $path
      * @return void
      */
-    public static function unqueue(string $name)
+    public static function unqueue(string $name, $path = null)
     {
-        Cookie::unqueue(static::withPrefix($name));
+        Cookie::unqueue(static::withPrefix($name), $path);
+    }
+
+    /**
+     * Determine if a cookie has been queued
+     *
+     * @param string $key
+     * @param string|null $path
+     * @return bool
+     */
+    public static function hasQueued(string $key, $path = null)
+    {
+        return Cookie::hasQueued(static::withPrefix($key), $path);
     }
 
     /**

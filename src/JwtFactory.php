@@ -235,7 +235,7 @@ class JwtFactory
      */
     public function ip(): self
     {
-        $this->header['ip'] = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'];
+        $this->header['ip'] = request()->getClientIp();
         return $this;
     }
 

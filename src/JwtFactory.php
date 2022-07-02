@@ -310,9 +310,7 @@ class JwtFactory
      */
     protected function browser()
     {
-        return function_exists('browser') && function_exists('browser_version')
-            ? browser() . explode('.', browser_version())[0]
-            : trim($_SERVER['HTTP_USER_AGENT']);
+        return \Browser::browserFamily() . \Browser::browserVersionMajor();
     }
 
     /**

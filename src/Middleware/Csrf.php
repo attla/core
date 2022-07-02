@@ -132,7 +132,7 @@ class Csrf
      */
     private function browser()
     {
-        return browser() . substr(browser_version(), 0, 2);
+        return \Browser::browserFamily() . \Browser::browserVersionMajor();
     }
 
     /**

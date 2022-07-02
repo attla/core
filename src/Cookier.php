@@ -160,7 +160,7 @@ class Cookier extends \ArrayObject
 
         return array_combine(
             array_map(
-                fn($value) => ltrim($value, static::$prefix),
+                fn($key) => ltrim($key, static::$prefix),
                 array_keys($cookies)
             ),
             array_map(

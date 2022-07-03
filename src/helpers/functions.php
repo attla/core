@@ -855,33 +855,17 @@ function maybe_unserialize($data)
  */
 function is_serialized($data)
 {
-    if (!is_string($data)) {
+    if (!is_string($data) || !$data) {
         return false;
     }
-    $data = trim($data);
-    if ('N;' == $data) {
-        return true;
-    }
-    if (!preg_match('/^([adObis]):/', $data, $match)) {
+
+    try {
+        $unserialized = @unserialize($data);
+    } catch (\Exception) {
         return false;
     }
-    switch ($match[1]) {
-        case 'a':
-        case 'O':
-        case 's':
-            if (preg_match("/^{$match[1]}:[0-9]+:.*[;}]\$/s", $data)) {
-                return true;
-            }
-            break;
-        case 'b':
-        case 'i':
-        case 'd':
-            if (preg_match("/^{$match[1]}:[0-9.E-]+;\$/", $data)) {
-                return true;
-            }
-            break;
-    }
-    return false;
+
+    return serialize($unserialized) === $data;
 }
 
 /**

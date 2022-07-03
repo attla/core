@@ -23,7 +23,15 @@ class AuthServiceProvider extends ServiceProvider
         Guard::register('api', function () use ($defaultProvider) {
             return $defaultProvider;
         });
+    }
 
+    /**
+     * Bootstrap the application service
+     *
+     * @return void
+     */
+    public function boot()
+    {
         $auth = new Authenticator($this->app);
         $this->app->instance('auth', $auth);
         $this->app['request']->setUserResolver(function ($guard = null) use ($auth) {

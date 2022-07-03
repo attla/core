@@ -156,6 +156,7 @@ class Application extends Container
         $this->registerAliases();
         $this->registerBaseServiceProviders();
         $this->bootstrapWith($this->bootstrappers);
+        $this['provider']->boot();
     }
 
     /**
@@ -229,8 +230,7 @@ class Application extends Container
     {
         $this['provider']
             ->load($providers)
-            ->register()
-            ->boot();
+            ->register();
     }
 
     /**

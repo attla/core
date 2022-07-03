@@ -561,7 +561,7 @@ function asset($file, $defaultFile = false)
 {
     $filePath = assetPath($file);
 
-    if ($defaultFile && !is_url($defaultFile)) {
+    if ($defaultFile && !filter_var($defaultFile, FILTER_VALIDATE_URL)) {
         $defaultFilePath = assetPath($defaultFile);
     }
 
@@ -574,7 +574,7 @@ function asset($file, $defaultFile = false)
     $version = '?v=' . (config('debug') ? time() : $version);
 
     if (!is_file(base_path($filePath)) && $defaultFile) {
-        if (!is_url($defaultFile)) {
+        if (!filter_var($defaultFile, FILTER_VALIDATE_URL)) {
             $defaultFilePath = assetPath($defaultFile);
 
             if (is_file(base_path($defaultFilePath))) {
@@ -781,17 +781,6 @@ function is_empty($val)
 }
 
 /**
- * Check if it is a valid email
- *
- * @param string $email
- * @return bool
- */
-function is_email($email)
-{
-    return preg_match('/^\S+@[\w\d.-]{2,}\.[\w]{2,6}$/iU', $email) ? true : false;
-}
-
-/**
  * Check if it is a valid username
  *
  * @param string $username
@@ -800,18 +789,6 @@ function is_email($email)
 function is_username($username, $max = 20)
 {
     return preg_match('/^[a-z\d_.-]{3,' . $max . '}$/i', $username) ? true : false;
-}
-
-/**
- * Check if it is a valid URL
- *
- * @param string $url
- * @return bool
- */
-function is_url($url)
-{
-    return preg_match('/^(http|https|ftp):\/\/([A-Z0-9][A-Z0-9_-]*'
-        . '(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i', $url) ? true : false;
 }
 
 /**

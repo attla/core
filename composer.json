@@ -31,7 +31,7 @@
         "league/flysystem": "^3.0",
         "spatie/ignition": "^1.0",
         "voku/anti-xss": "^4.1",
-        "hisorange/browser-detect": "^4.5"
+        "hisorange/browser-detect": "dev-stable"
     },
     "require-dev": {},
     "autoload": {

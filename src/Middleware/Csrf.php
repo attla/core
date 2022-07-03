@@ -20,7 +20,7 @@ class Csrf
      *
      * @var array
      */
-    protected array $except = [];
+    protected $except = [];
 
     /**
      * CSRF token
@@ -95,7 +95,7 @@ class Csrf
      */
     protected function inExceptArray($request)
     {
-        foreach ($this->except as $except) {
+        foreach ((array) $this->except as $except) {
             if ($except !== '/') {
                 $except = trim($except, '/');
             }
@@ -183,7 +183,7 @@ class Csrf
         $randomNl = $this->randomRepeat([" ", "\r", "\n", "\t"], 6);
         $formatInput = '%s<input%stype="hidden"%sname="'
             . $this->timeToken() . '"%svalue="'
-            . $this->csrf . '"%s/>%s';
+            . $this->token . '"%s/>%s';
 
         return vsprintf($formatInput, $randomNl);
     }

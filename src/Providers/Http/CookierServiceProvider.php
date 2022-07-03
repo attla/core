@@ -18,11 +18,5 @@ class CookierServiceProvider extends ServiceProvider
         $config = $this->app['config'];
         Cookier::setRequest($this->app['request']);
         Cookier::setPrefix($config->get('prefix', ''));
-
-        $config->set('csrf', Encrypter::hash(
-            url()->full()
-            . \Browser::browserFamily()
-            . \Browser::browserVersionMajor()
-        ));
     }
 }

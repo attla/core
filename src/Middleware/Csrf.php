@@ -13,14 +13,21 @@ class Csrf
      *
      * @var \Illuminate\Translation\Translator
      */
-    protected $translator;
+    protected Translator $translator;
 
     /**
      * The URIs that should be excluded from CSRF verification.
      *
      * @var array
      */
-    protected $except = [];
+    protected array $except = [];
+
+    /**
+     * CSRF token
+     *
+     * @var string
+     */
+    protected string $token = '';
 
     /**
      * Create a new middleware instance.
@@ -33,6 +40,12 @@ class Csrf
         if (!is_null($translator)) {
             $this->translator = $translator;
         }
+
+        $this->token = Encrypter::hash(
+            url()->full()
+            . \Browser::browserFamily()
+            . \Browser::browserVersionMajor()
+        );
     }
 
     /**
@@ -52,7 +65,7 @@ class Csrf
             || $this->tokensMatch($request)
         ) {
             if (!$isExcept) {
-                Cookier::set($this->timeToken(), config('csrf'), 60);
+                Cookier::set($this->timeToken(), $this->token, 60);
             }
 
             return $next($request);
@@ -170,7 +183,7 @@ class Csrf
         $randomNl = $this->randomRepeat([" ", "\r", "\n", "\t"], 6);
         $formatInput = '%s<input%stype="hidden"%sname="'
             . $this->timeToken() . '"%svalue="'
-            . config('csrf') . '"%s/>%s';
+            . $this->csrf . '"%s/>%s';
 
         return vsprintf($formatInput, $randomNl);
     }

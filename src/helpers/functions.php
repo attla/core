@@ -763,21 +763,10 @@ function array_random_value($array)
  */
 function is_array_assoc(array $array)
 {
-    if (array() === $array) {
+    if ([] === $array) {
         return false;
     }
     return array_keys($array) !== range(0, count($array) - 1);
-}
-
-/**
- * Checks if a value is empty
- *
- * @param string $val
- * @return bool
- */
-function is_empty($val)
-{
-    return strlen(trim(preg_replace('/\xc2\xa0/', ' ', $val))) == 0 ? true : false;
 }
 
 /**

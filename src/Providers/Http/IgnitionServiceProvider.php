@@ -8,11 +8,11 @@ use Illuminate\Support\ServiceProvider;
 class IgnitionServiceProvider extends ServiceProvider
 {
     /**
-     * Register the service provider
+     * Bootstrap the application service
      *
      * @return void
      */
-    public function register()
+    public function boot()
     {
         if (!\App::runningInConsole()) {
             Ignition::make()

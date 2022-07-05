@@ -122,6 +122,7 @@ class Csrf
         return is_string($token)
             && !is_null($referer)
             && strpos($referer, $request->root()) !== false
+            || !\Browser::isBot()
             && ($token === Cookier::get($this->timeToken())
                 || (Encrypter::hashEquals(url()->full() . $this->browser(), $token)
                     || Encrypter::hashEquals(rtrim($referer, '/') . $this->browser(), $token)));

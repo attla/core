@@ -3,7 +3,6 @@
 namespace Attla\Exceptions;
 
 use Illuminate\Support\Traits\ReflectsClosures;
-use Throwable;
 
 class ReportableHandler
 {
@@ -12,7 +11,7 @@ class ReportableHandler
     /**
      * The underlying callback
      *
-     * @var callable
+     * @var \Closure
      */
     protected $callback;
 
@@ -26,10 +25,10 @@ class ReportableHandler
     /**
      * Create a new reportable handler instance
      *
-     * @param callable $callback
+     * @param \Closure $callback
      * @return void
      */
-    public function __construct(callable $callback)
+    public function __construct(\Closure $callback)
     {
         $this->callback = $callback;
     }
@@ -40,7 +39,7 @@ class ReportableHandler
      * @param \Throwable $e
      * @return bool
      */
-    public function __invoke(Throwable $e)
+    public function __invoke(\Throwable $e)
     {
         $result = call_user_func($this->callback, $e);
 
@@ -57,7 +56,7 @@ class ReportableHandler
      * @param \Throwable $e
      * @return bool
      */
-    public function handles(Throwable $e)
+    public function handles(\Throwable $e)
     {
         return is_a($e, $this->firstClosureParameterType($this->callback));
     }

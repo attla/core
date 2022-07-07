@@ -318,13 +318,12 @@ class Application extends Container
      */
     protected function runConsoleApplication()
     {
-        $kernel = $this[ContractConsoleKernel::class];
-        $kernel->setName('Attla framework');
-
-        return $kernel->handle(
-            new ArgvInput(),
-            new ConsoleOutput()
-        );
+        return $this[ContractConsoleKernel::class]
+            ->setName('Attla framework')
+            ->handle(
+                new ArgvInput(),
+                new ConsoleOutput()
+            );
     }
 
     /**

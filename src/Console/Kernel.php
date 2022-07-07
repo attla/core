@@ -311,11 +311,12 @@ class Kernel implements KernelContract
      * Sets the application name
      *
      * @param string $name
-     * @return void
+     * @return self
      **/
     public function setName($name)
     {
         $this->getArtisan()->setName($name);
+        return $this;
     }
 
     /**

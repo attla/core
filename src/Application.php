@@ -449,16 +449,6 @@ class Application extends Container
     }
 
     /**
-     * Get the packages config
-     *
-     * @return string
-     */
-    public function packageConfigPath()
-    {
-        return $this->packagePath('config');
-    }
-
-    /**
      * Get the packages services cache
      *
      * @return string

@@ -65,7 +65,7 @@ class Application extends Container
      *
      * @var array
      */
-    protected $aliases = [
+    protected $coreAliases = [
         'app' => [self::class, \Illuminate\Container\Container::class, \Illuminate\Contracts\Container\Container::class, \Psr\Container\ContainerInterface::class],
         'blade.compiler' => [\Illuminate\View\Compilers\BladeCompiler::class],
         'cache' => [\Illuminate\Cache\CacheManager::class, \Illuminate\Contracts\Cache\Factory::class],
@@ -164,7 +164,7 @@ class Application extends Container
     public function bootstrap()
     {
         $this->registerBaseBindings();
-        $this->registerAliases();
+        $this->registerCoreAliases();
         $this->registerBaseServiceProviders();
         $this->bootstrapWith($this->bootstrappers);
         $this['provider']->boot();
@@ -222,9 +222,9 @@ class Application extends Container
      *
      * @return void
      */
-    protected function registerAliases()
+    protected function registerCoreAliases()
     {
-        foreach ($this->aliases as $key => $aliases) {
+        foreach ($this->coreAliases as $key => $aliases) {
             foreach ($aliases as $alias) {
                 $this->alias($key, $alias);
             }

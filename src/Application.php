@@ -136,6 +136,17 @@ class Application extends Container
     }
 
     /**
+     * Determine if the application locale is the given locale
+     *
+     * @param string $locale
+     * @return bool
+     */
+    public function isLocale($locale)
+    {
+        return $this->getLocale() == $locale;
+    }
+
+    /**
      * Determine if the application is running in the console
      *
      * @return bool

@@ -37,7 +37,7 @@ class Application extends Container
      *
      * @var string
      */
-    protected $corePackage = 'attla/core';
+    protected string $corePackage = 'attla/core';
 
     /**
      * The bootstrap classes for the application
@@ -71,7 +71,7 @@ class Application extends Container
      *
      * @var array
      */
-    protected $coreAliases = [
+    protected array $coreAliases = [
         'app' => [self::class, \Illuminate\Container\Container::class, \Illuminate\Contracts\Container\Container::class, \Psr\Container\ContainerInterface::class],
         'blade.compiler' => [\Illuminate\View\Compilers\BladeCompiler::class],
         'cache' => [\Illuminate\Cache\CacheManager::class, \Illuminate\Contracts\Cache\Factory::class],
@@ -98,14 +98,14 @@ class Application extends Container
      *
      * @var string
      */
-    protected $namespace;
+    protected string $namespace;
 
     /**
      * The application version
      *
      * @var string
      */
-    protected $version;
+    protected string $version;
 
     /**
      * Get the version of the application

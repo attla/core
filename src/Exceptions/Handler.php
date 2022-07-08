@@ -7,7 +7,6 @@ use Attla\Application;
 use Illuminate\Support\Arr;
 use Psr\Log\LoggerInterface;
 use Illuminate\Http\Response;
-use InvalidArgumentException;
 use Illuminate\Routing\Router;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Reflector;
@@ -193,7 +192,7 @@ class Handler implements ExceptionHandlerContract
         }
 
         if (! is_string($from) || ! $to instanceof \Closure) {
-            throw new InvalidArgumentException('Invalid exception mapping.');
+            throw new \InvalidArgumentException('Invalid exception mapping.');
         }
 
         $this->exceptionMap[$from] = $to;

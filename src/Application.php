@@ -147,16 +147,6 @@ class Application extends Container
     }
 
     /**
-     * Determine if the application is running in the console
-     *
-     * @return bool
-     */
-    public function runningInConsole()
-    {
-        return in_array(\PHP_SAPI, ['cli', 'phpdbg']);
-    }
-
-    /**
      * Bootstrap the application's bindings ans aliases
      *
      * @return void
@@ -503,6 +493,26 @@ class Application extends Container
     public function environment(...$environments)
     {
         return false;
+    }
+
+    /**
+     * Determine if the application is running in the console
+     *
+     * @return bool
+     */
+    public function runningInConsole()
+    {
+        return in_array(\PHP_SAPI, ['cli', 'phpdbg']);
+    }
+
+    /**
+     * Determine if the application is running unit tests
+     *
+     * @return bool
+     */
+    public function runningUnitTests()
+    {
+        return $this->bound('env') && $this['env'] === 'testing';
     }
 
     /**

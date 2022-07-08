@@ -15,6 +15,7 @@ use Illuminate\{
     Container\Container,
     Filesystem\Filesystem,
     Events\EventServiceProvider,
+    Log\LogServiceProvider,
     Routing\RoutingServiceProvider,
 };
 use Symfony\Component\Console\{
@@ -81,6 +82,7 @@ class Application extends Container
         'files' => [\Illuminate\Filesystem\Filesystem::class],
         'filesystem' => [\Illuminate\Filesystem\FilesystemManager::class, \Illuminate\Contracts\Filesystem\Factory::class],
         'translator' => [\Illuminate\Translation\Translator::class, \Illuminate\Contracts\Translation\Translator::class],
+        'log' => [\Illuminate\Log\LogManager::class, \Psr\Log\LoggerInterface::class],
         'redirect' => [\Illuminate\Routing\Redirector::class],
         'request' => [\Illuminate\Http\Request::class, \Symfony\Component\HttpFoundation\Request::class],
         'router' => [\Illuminate\Routing\Router::class, \Illuminate\Contracts\Routing\Registrar::class, \Illuminate\Contracts\Routing\BindingRegistrar::class],
@@ -209,7 +211,8 @@ class Application extends Container
     protected function registerBaseServiceProviders()
     {
         $this->register(EventServiceProvider::class);
-        $this->register(\Illuminate\Routing\RoutingServiceProvider::class);
+        $this->register(LogServiceProvider::class);
+        $this->register(RoutingServiceProvider::class);
     }
 
     /**

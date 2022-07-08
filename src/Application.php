@@ -3,15 +3,24 @@
 namespace Attla;
 
 use Attla\PackageDiscover;
-use Attla\Providers\Repository;
-use Illuminate\Routing\Pipeline;
-use Illuminate\Container\Container;
-use Illuminate\Filesystem\Filesystem;
+use Attla\Providers\{
+    Repository,
+    Console\ConsoleSupportServiceProvider,
+    Http\HttpSupportServiceProvider,
+};
 use Illuminate\Contracts\Http\Kernel as ContractHttpKernel;
 use Illuminate\Contracts\Console\Kernel as ContractConsoleKernel;
-use Illuminate\Events\EventServiceProvider;
-use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Output\ConsoleOutput;
+use Illuminate\{
+    Routing\Pipeline,
+    Container\Container,
+    Filesystem\Filesystem,
+    Events\EventServiceProvider,
+    Routing\RoutingServiceProvider,
+};
+use Symfony\Component\Console\{
+    Input\ArgvInput,
+    Output\ConsoleOutput,
+};
 use Attla\Bootstrap\{
     LoadConfiguration,
     HandleExceptions,
@@ -45,20 +54,16 @@ class Application extends Container
     /**
      * The http application's service providers
      *
-     * @var string[]
+     * @var string[]|string
      */
-    protected $httpProviders = [
-        \Attla\Providers\Http\HttpSupportServiceProvider::class,
-    ];
+    protected $httpProviders = HttpSupportServiceProvider::class;
 
     /**
      * The console application's service providers
      *
-     * @var string[]
+     * @var string[]|string
      */
-    protected $consoleProviders = [
-        \Attla\Providers\Console\ConsoleSupportServiceProvider::class,
-    ];
+    protected $consoleProviders = ConsoleSupportServiceProvider::class;
 
     /**
      * The application's aliases
@@ -251,15 +256,10 @@ class Application extends Container
      */
     public function registerApplicationProviders()
     {
-        if ($this->runningInConsole()) {
-            $this->register($this->consoleProviders);
-            $this->register($this[ContractConsoleKernel::class]->providers);
-        }
-
-        $this->register(array_merge(
-            $this->httpProviders,
-            $this[ContractHttpKernel::class]->providers,
-        ));
+        $this->register($this->runningInConsole() ? $this->consoleProviders : $this->httpProviders);
+        $this->register($this[
+            $this->runningInConsole() ? ContractConsoleKernel::class : ContractHttpKernel::class
+        ]->providers);
     }
 
     /**

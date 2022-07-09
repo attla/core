@@ -337,10 +337,8 @@ class Application extends Container
      */
     protected function runHttpApplication()
     {
-        $kernel = $this[ContractHttpKernel::class];
-
         $router = $this['router'];
-        $this->syncMiddlewaresToRouter($kernel);
+        $this->syncMiddlewaresToRouter($kernel = $this[ContractHttpKernel::class]);
 
         (new Pipeline($this))
             ->send($this['request'])

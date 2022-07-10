@@ -154,13 +154,15 @@ class PackageDiscover
      */
     protected function packagesToIgnore()
     {
-        if (!is_file($this->basePath . '/composer.json')) {
+        if (!is_file($file = $this->basePath . '/composer.json')) {
             return [];
         }
 
-        return json_decode(file_get_contents(
-            $this->basePath . '/composer.json'
-        ), true)['extra']['attla']['dont-discover'] ?? [];
+        $composer = json_decode(file_get_contents(
+            $file
+        ), true);
+
+        return $composer['extra']['attla']['dont-discover'] ?? $composer['extra']['laravel']['dont-discover'] ?? [];
     }
 
     /**

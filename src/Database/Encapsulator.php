@@ -29,7 +29,9 @@ class Encapsulator
         if (is_null(self::$instance)) {
             self::$capsule = new Capsule();
 
-            self::$capsule->addConnection(self::getDriverConfig(config('db.driver', 'mysql')));
+            $config = config();
+            $connection = $config->get('database.connections.' . $config->get('database.default', 'mysql'));
+            self::$capsule->addConnection($connection);
 
             self::$capsule->setAsGlobal();
             self::$capsule->bootEloquent();
@@ -39,69 +41,6 @@ class Encapsulator
         }
 
         return self::$instance;
-    }
-
-    /**
-     * Get the driver connection config
-     *
-     * @return array
-     */
-    public static function getDriverConfig($driver)
-    {
-        $config = config();
-
-        if ($driver == 'sqlite') {
-            return [
-                'driver' => 'sqlite',
-                'url' => $config->get('db.url'),
-                'database' => $config->get('db.database', database_path('database.sqlite')),
-                'prefix' => '',
-                'foreign_key_constraints' => $config->get('db.foreign_keys', true),
-            ];
-        }
-
-        $connection = [
-            'url' => $config->get('db.url'),
-            'host' => $config->get('db.host', '127.0.0.1'),
-            'database' => $config->get('db.database', 'attla'),
-            'username' => $config->get('db.username', 'attla'),
-            'password' => $config->get('db.password', ''),
-            'prefix' => $config->get('db.prefix', ''),
-            'prefix_indexes' => true,
-        ];
-
-        if ($driver == 'mysql') {
-            $connection = array_merge($connection, [
-                'driver' => 'mysql',
-                'port' => $config->get('db.port', '3306'),
-                'unix_socket' => $config->get('db.socket', ''),
-                'charset' => $config->get('db.charset', 'utf8mb4'),
-                'collation' => $config->get('db.collation', 'utf8mb4_unicode_ci'),
-                'strict' => true,
-                'engine' => null,
-            ]);
-        }
-
-        if ($driver == 'pgsql') {
-            $connection = array_merge($connection, [
-                'driver' => 'pgsql',
-                'port' => $config->get('db.port', '5432'),
-                'charset' => 'utf8',
-                'schema' => 'public',
-                'sslmode' => 'prefer',
-            ]);
-        }
-
-        if ($driver == 'sqlsrv') {
-            $connection = array_merge($connection, [
-                'driver' => 'sqlsrv',
-                'host' => $config->get('db.host', 'localhost'),
-                'port' => $config->get('db.port', '1433'),
-                'charset' => 'utf8',
-            ]);
-        }
-
-        return $connection;
     }
 
     /**

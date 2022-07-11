@@ -135,8 +135,8 @@ class StartSession
     protected function addCookieToResponse($response, $request, $session)
     {
         if (!empty($response->headers)) {
-            $stringMode = config('encrypt.mode');
-            config(['encrypt.mode' => 'serialize']);
+            $stringMode = config('app.to_string');
+            config(['app.to_string' => 'serialize']);
 
             if ($request->method() == 'GET') {
                 $session->ageFlashData();
@@ -147,7 +147,7 @@ class StartSession
             }
 
             $value = $this->isCookieDriver() ? Encrypter::encode(collect($session->all())->except('_token')) : $session->getId();
-            config(['encrypt.mode' => $stringMode]);
+            config(['app.to_string' => $stringMode]);
 
             Cookier::set('session', $value, $this->config['lifetime']);
         }

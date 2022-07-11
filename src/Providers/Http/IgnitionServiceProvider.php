@@ -18,7 +18,7 @@ class IgnitionServiceProvider extends ServiceProvider
             Ignition::make()
                 ->setTheme('auto')
                 ->applicationPath(\App::basePath())
-                ->shouldDisplayException(config('debug'))
+                ->shouldDisplayException(config('app.debug'))
                 ->registerMiddleware([
                     AddUserInformation::class,
                     AddEnvironmentInformation::class,
@@ -51,7 +51,7 @@ class AddEnvironmentInformation implements FlareMiddleware
         $report->group('env', [
             'Attla version' => $attlaVersion,
             'Attla locale' => \App::getLocale(),
-            'App debug' => config('debug'),
+            'App debug' => config('app.debug'),
             'environment' => config('app.env'),
             'php_version' => phpversion(),
         ]);

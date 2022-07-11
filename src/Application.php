@@ -17,12 +17,16 @@ use Illuminate\{
     Events\EventServiceProvider,
     Log\LogServiceProvider,
     Routing\RoutingServiceProvider,
+    Support\Arr,
+    Support\Str,
+    Support\Collection,
 };
 use Symfony\Component\Console\{
     Input\ArgvInput,
     Output\ConsoleOutput,
 };
 use Attla\Bootstrap\{
+    LoadEnvironmentVariables,
     LoadConfiguration,
     HandleExceptions,
     RegisterFacades,
@@ -37,7 +41,7 @@ class Application extends Container
      *
      * @var string
      */
-    protected string $corePackage = 'attla/core';
+    protected $corePackage = 'attla/core';
 
     /**
      * The bootstrap classes for the application
@@ -45,6 +49,7 @@ class Application extends Container
      * @var string[]
      */
     protected $bootstrappers = [
+        LoadEnvironmentVariables::class,
         LoadConfiguration::class,
         HandleExceptions::class,
         RegisterFacades::class,
@@ -71,7 +76,7 @@ class Application extends Container
      *
      * @var array
      */
-    protected array $coreAliases = [
+    protected $coreAliases = [
         'app' => [self::class, \Illuminate\Container\Container::class, \Illuminate\Contracts\Container\Container::class, \Psr\Container\ContainerInterface::class],
         'blade.compiler' => [\Illuminate\View\Compilers\BladeCompiler::class],
         'cache' => [\Illuminate\Cache\CacheManager::class, \Illuminate\Contracts\Cache\Factory::class],
@@ -98,14 +103,28 @@ class Application extends Container
      *
      * @var string
      */
-    protected string $namespace;
+    protected $namespace;
 
     /**
      * The application version
      *
      * @var string
      */
-    protected string $version;
+    protected $version;
+
+    /**
+     * The custom environment path defined by the developer
+     *
+     * @var string
+     */
+    protected $environmentPath;
+
+    /**
+     * The environment file to load during bootstrapping
+     *
+     * @var string
+     */
+    protected $environmentFile = '.env';
 
     /**
      * Get the version of the application
@@ -243,26 +262,28 @@ class Application extends Container
     }
 
     /**
-     * Register packages service providers
-     *
-     * @return void
-     */
-    public function registerPackagesProviders()
-    {
-        $this->register($this[PackageDiscover::class]->providers());
-    }
-
-    /**
      * Register environment service providers
      *
      * @return void
      */
-    public function registerApplicationProviders()
+    public function registerConfiguredProviders()
     {
-        $this->register($this->runningInConsole() ? $this->consoleProviders : $this->httpProviders);
-        $this->register($this[
-            $this->runningInConsole() ? ContractConsoleKernel::class : ContractHttpKernel::class
-        ]->providers);
+
+        $providers = Collection::make($this->httpProviders)
+                ->merge($this[
+                    $this->runningInConsole() ? ContractConsoleKernel::class : ContractHttpKernel::class
+                ]->providers);
+
+        if ($this->runningInConsole()) {
+            $providers = $providers->merge($this->consoleProviders);
+        }
+
+        $this->register(
+            $providers->merge($this[PackageDiscover::class]->providers())
+                ->merge($this['config']->get('app.providers', []))
+                ->flatten()
+                ->toArray()
+        );
     }
 
     /**
@@ -395,6 +416,29 @@ class Application extends Container
     }
 
     /**
+     * Set the language file directory.
+     *
+     * @param string $path
+     * @return $this
+     */
+    public function useLangPath($path): self
+    {
+        $this['path.lang'] = $path;
+        return $this;
+    }
+
+    /**
+     * Get the path to the public / web directory
+     *
+     * @param string $path Optionally, a path to append to the public path
+     * @return string
+     */
+    public function publicPath($path = '')
+    {
+        return $this->basePath('public/' . $path);
+    }
+
+    /**
      * Get the path to the storage directory
      *
      * @param string $path Optionally, a path to append to the storage path
@@ -428,6 +472,17 @@ class Application extends Container
     }
 
     /**
+     * Get the path to the config directory
+     *
+     * @param string $path Optionally, a path to append to the config path
+     * @return string
+     */
+    public function configPath($path = '')
+    {
+        return $this->basePath('config/' . $path);
+    }
+
+    /**
      * Get the path to the packages directory
      *
      * @param string $path Optionally, a path to append to the package path
@@ -436,17 +491,6 @@ class Application extends Container
     public function packagePath($path = '')
     {
         return $this->basePath('packages/' . $path);
-    }
-
-    /**
-     * Get the path to the config directory
-     *
-     * @param string $path Optionally, a path to append to the config path
-     * @return string
-     */
-    public function configPath($path = '')
-    {
-        return $this->packagePath('config/' . $path);
     }
 
     /**
@@ -468,21 +512,73 @@ class Application extends Container
     {
         $this['path'] = $this->path();
         $this['path.base'] = $this->basePath();
-        $this['path.lang'] = $this->langPath();
         $this['path.config'] = $this->configPath();
+        $this['path.public'] = $this->publicPath();
         $this['path.storage'] = $this->storagePath();
         $this['path.database'] = $this->databasePath();
         $this['path.resources'] = $this->resourcePath();
+
+        $this->useLangPath(value(function () {
+            if (is_dir($directory = $this->langPath())) {
+                return $directory;
+            }
+
+            return $this->basePath('lang');
+        }));
     }
 
     /**
-     * Get the path to the environment file
+     * Get the path to the environment file directory
      *
      * @return string
      */
-    public function environmentFilePath()
+    public function environmentPath(): string
     {
-        return $this->basePath('config.json');
+        return $this->environmentPath ?: $this->basePath();
+    }
+
+    /**
+     * Set the directory for the environment file
+     *
+     * @param string $path
+     * @return $this
+     */
+    public function useEnvironmentPath($path): self
+    {
+        $this->environmentPath = $path;
+        return $this;
+    }
+
+    /**
+     * Set the environment file to be loaded during bootstrapping
+     *
+     * @param string $file
+     * @return $this
+     */
+    public function loadEnvironmentFrom(string $file): self
+    {
+        $this->environmentFile = $file;
+        return $this;
+    }
+
+    /**
+     * Get the environment file the application is using
+     *
+     * @return string
+     */
+    public function environmentFile(): string
+    {
+        return $this->environmentFile ?: '.env';
+    }
+
+    /**
+     * Get the fully qualified path to the environment file
+     *
+     * @return string
+     */
+    public function environmentFilePath(): string
+    {
+        return $this->environmentPath() . DIRECTORY_SEPARATOR . $this->environmentFile();
     }
 
     /**
@@ -491,9 +587,48 @@ class Application extends Container
      * @param string|array $environments
      * @return string|bool
      */
-    public function environment(...$environments)
+    public function environment(...$environments): bool
     {
-        return false;
+        if (!$this->bound('env')) {
+            return 'unknown';
+        }
+
+        if (count($environments) > 0) {
+            return Str::is(Arr::flatten($environments), $this['env']);
+        }
+
+        return $this['env'];
+    }
+
+    /**
+     * Determine if the application is in the local environment
+     *
+     * @return bool
+     */
+    public function isLocal(): bool
+    {
+        return $this->bound('env') && $this['env'] === 'local';
+    }
+
+    /**
+     * Determine if the application is in the production environment
+     *
+     * @return bool
+     */
+    public function isProduction(): bool
+    {
+        return $this->bound('env') && $this['env'] === 'production';
+    }
+
+    /**
+     * Detect the application's current environment
+     *
+     * @param \Closure $callback
+     * @return string
+     */
+    public function detectEnvironment(\Closure $callback)
+    {
+        return $this['env'] = (new EnvironmentDetector())->detect($callback, $_SERVER['argv'] ?? null);
     }
 
     /**
@@ -501,7 +636,7 @@ class Application extends Container
      *
      * @return bool
      */
-    public function runningInConsole()
+    public function runningInConsole(): bool
     {
         return in_array(\PHP_SAPI, ['cli', 'phpdbg']);
     }
@@ -511,45 +646,19 @@ class Application extends Container
      *
      * @return bool
      */
-    public function runningUnitTests()
+    public function runningUnitTests(): bool
     {
         return $this->bound('env') && $this['env'] === 'testing';
     }
 
     /**
-     * Get environment file contents
+     * Determine if the application is running with debug mode enabled
      *
-     * @return array
-     *
-     * @throws \Exception
+     * @return bool
      */
-    public function getEnvironment()
+    public function hasDebugModeEnabled(): bool
     {
-        if (!is_file($configFile = $this->environmentFilePath())) {
-            throw new \Exception("Configuration file [{$configFile}] not found.");
-        }
-
-        $config = json_decode($this->removeJsonComments(file_get_contents($configFile)), true);
-
-        if (!is_array($config)) {
-            throw new \Exception("Error to parse configuration file [{$configFile}].");
-        }
-
-        return $config;
-    }
-
-    /**
-     * Remove json comments from file
-     *
-     * @return string
-     */
-    protected function removeJsonComments($json)
-    {
-        return preg_replace([
-            '/\/\*.*\*\//Us',
-            '/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/',
-            '/\/\/.*/',
-        ], '', $json);
+        return (bool) $this['config']->get('app.debug');
     }
 
     /**

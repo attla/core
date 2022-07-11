@@ -530,7 +530,7 @@ class Handler implements ExceptionHandlerContract
      */
     protected function prepareResponse($request, \Throwable $e)
     {
-        if (! $this->isHttpException($e) && config('debug')) {
+        if (! $this->isHttpException($e) && config('app.debug')) {
             return $this->toIlluminateResponse($this->convertExceptionToResponse($e), $e);
         }
 
@@ -568,11 +568,11 @@ class Handler implements ExceptionHandlerContract
     protected function renderExceptionContent(\Throwable $e)
     {
         try {
-            return config('debug') && app()->has(ExceptionRenderer::class)
+            return config('app.debug') && app()->has(ExceptionRenderer::class)
                         ? $this->renderExceptionWithWhoops($e)
-                        : $this->renderExceptionWithSymfony($e, config('debug'));
+                        : $this->renderExceptionWithSymfony($e, config('app.debug'));
         } catch (\Throwable $e) {
-            return $this->renderExceptionWithSymfony($e, config('debug'));
+            return $this->renderExceptionWithSymfony($e, config('app.debug'));
         }
     }
 
@@ -725,7 +725,7 @@ class Handler implements ExceptionHandlerContract
      */
     protected function convertExceptionToArray(\Throwable $e)
     {
-        return config('debug') ? [
+        return config('app.debug') ? [
             'message' => $e->getMessage(),
             'exception' => get_class($e),
             'file' => $e->getFile(),

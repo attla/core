@@ -26,7 +26,7 @@ class SetRequest
      */
     protected function createConsoleRequest(Application $app)
     {
-        $uri = $app['config']->get('server.host', 'http://localhost');
+        $uri = $app['config']->get('app.server.host', 'http://localhost');
         $components = parse_url($uri);
         $server = $_SERVER;
 

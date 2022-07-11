@@ -33,7 +33,7 @@ class RegisterFacades
 
         AliasLoader::getInstance(
             Facade::defaultAliases()
-                ->merge($app['config']->get('aliases', []))
+                ->merge($app['config']->get('app.aliases', []))
                 ->merge($app[PackageDiscover::class]->aliases())
                 ->merge($this->aliases)
                 ->toArray()

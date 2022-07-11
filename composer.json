@@ -19,6 +19,7 @@
         "php": "^8.0.2",
         "doctrine/dbal": "^2.0 || ^3.0",
         "illuminate/cache": "^9.0",
+        "illuminate/config": "^9.0",
         "illuminate/console": "^9.0",
         "illuminate/cookie": "^9.0",
         "illuminate/database": "^9.0",
@@ -32,6 +33,7 @@
         "league/flysystem": "^3.0",
         "spatie/ignition": "^1.0",
         "voku/anti-xss": "^4.1",
+        "vlucas/phpdotenv": "^5.4.1",
         "hisorange/browser-detect": "dev-stable"
     },
     "require-dev": {},

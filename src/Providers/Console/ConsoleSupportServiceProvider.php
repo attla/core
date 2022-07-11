@@ -12,10 +12,8 @@ class ConsoleSupportServiceProvider extends Aggregate
      *
      * @var string[]
      */
+
     protected $providers = [
-        \Illuminate\Cache\CacheServiceProvider::class,
-        \Illuminate\Database\DatabaseServiceProvider::class,
-        \Illuminate\Filesystem\FilesystemServiceProvider::class,
         CliServiceProvider::class,
         \Illuminate\Database\MigrationServiceProvider::class,
         ComposerServiceProvider::class,

@@ -118,7 +118,7 @@ function name($name)
 function year()
 {
     $currentYear = date('Y');
-    $year = (int) config('year');
+    $year = (int) config('app.year');
 
     if (!$year) {
         return $currentYear;
@@ -161,7 +161,7 @@ function resolve($name, array $parameters = [])
  *
  * @param array|string|null $key
  * @param mixed $default
- * @return \Attla\Config|mixed
+ * @return \Illuminate\Config\Repository|mixed
  */
 function config($key = null, $default = null)
 {
@@ -508,6 +508,17 @@ function app_path($path = '')
 }
 
 /**
+ * Get the path to the public folder
+ *
+ * @param string $path
+ * @return string
+ */
+function public_path($path = '')
+{
+    return app()->publicPath($path);
+}
+
+/**
  * Get the path to the resources folder
  *
  * @param string $path
@@ -565,13 +576,13 @@ function asset($file, $defaultFile = false)
         $defaultFilePath = assetPath($defaultFile);
     }
 
-    $version = config('version') ?? app()->version();
+    $version = config('app.version') ?? app()->version();
 
     if (!$version) {
         $version = '0.0.0';
     }
 
-    $version = '?v=' . (config('debug') ? time() : $version);
+    $version = '?v=' . (config('app.debug') ? time() : $version);
 
     if (!is_file(base_path($filePath)) && $defaultFile) {
         if (!filter_var($defaultFile, FILTER_VALIDATE_URL)) {

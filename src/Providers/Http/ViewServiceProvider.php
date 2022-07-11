@@ -19,7 +19,7 @@ class ViewServiceProvider extends ServiceProvider
         $this->registerNamespaces();
         $this->defineDirectives($bladeCompiler);
 
-        if ($this->app['config']['minify']) {
+        if ($this->app['config']->get('app.minify', false)) {
             $bladeCompiler->extend(function ($value, $compiler) {
                 return Minify::compile($value, [
                     'disable_comments' => true,

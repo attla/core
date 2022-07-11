@@ -14,7 +14,7 @@ class CacheBuilder extends QueryBuilder
      */
     protected function runSelect()
     {
-        return Cache::store('queries')->remember($this->getCacheKey(), 1, function () {
+        return Cache::store('array')->remember($this->getCacheKey(), 1, function () {
             return parent::runSelect();
         });
     }

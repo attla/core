@@ -69,7 +69,7 @@ class Encrypter
      */
     public static function toText($item): string
     {
-        $mode = config('encrypt.mode');
+        $mode = config('app.to_string');
         if (!in_array($mode, ['query', 'json', 'serialize'])) {
             $mode = 'query';
         }
@@ -86,7 +86,7 @@ class Encrypter
      */
     public static function getSecret(): string
     {
-        if ($secret = config('encrypt.secret')) {
+        if ($secret = config('app.key')) {
             return (string) $secret;
         }
 

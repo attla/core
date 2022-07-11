@@ -3,7 +3,6 @@
 namespace Attla\Providers\Http;
 
 use Attla\Cookier;
-use Attla\Encrypter;
 use Illuminate\Support\ServiceProvider;
 
 class CookierServiceProvider extends ServiceProvider
@@ -15,8 +14,7 @@ class CookierServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $config = $this->app['config'];
         Cookier::setRequest($this->app['request']);
-        Cookier::setPrefix($config->get('prefix', ''));
+        Cookier::setPrefix(env('APP_PREFIX', ''));
     }
 }

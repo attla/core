@@ -2,6 +2,7 @@
 
 namespace Attla\Console\Commands;
 
+use Illuminate\Support\Env;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\PhpExecutableFinder;
@@ -31,6 +32,22 @@ class ServeCommand extends Command
     protected $portOffset = 0;
 
     /**
+     * The environment variables that should be passed from host machine to the PHP server process
+     *
+     * @var string[]
+     */
+    public static $passthroughVariables = [
+        'APP_ENV',
+        'LARAVEL_SAIL',
+        'PHP_CLI_SERVER_WORKERS',
+        'PHP_IDE_CONFIG',
+        'SYSTEMROOT',
+        'XDEBUG_CONFIG',
+        'XDEBUG_MODE',
+        'XDEBUG_SESSION',
+    ];
+
+    /**
      * Execute the console command
      *
      * @return int
@@ -43,7 +60,9 @@ class ServeCommand extends Command
 
         $this->line("<info>Starting Attla development server:</info> http://{$this->host()}:{$this->port()}");
 
-        $environmentFile = $this->laravel->environmentFilePath();
+        $environmentFile = $this->option('env')
+            ? $environmentFile . '.' . $this->option('env')
+            : $environmentFile;
         $hasEnvironment = is_file($environmentFile);
 
         $environmentLastModified = $hasEnvironment
@@ -64,7 +83,7 @@ class ServeCommand extends Command
             ) {
                 $environmentLastModified = filemtime($environmentFile);
 
-                $this->comment('config.json modified. Restarting server...');
+                $this->comment('Environment modified. Restarting server...');
 
                 $process->stop(5);
 
@@ -94,11 +113,11 @@ class ServeCommand extends Command
     protected function startProcess($hasEnvironment)
     {
         $process = new Process($this->serverCommand(), null, collect($_ENV)->mapWithKeys(function ($value, $key) use ($hasEnvironment) {
-            if ($this->option('no-reload') || ! $hasEnvironment) {
+            if ($this->option('no-reload') || !$hasEnvironment) {
                 return [$key => $value];
             }
 
-            return in_array($key, ['APP_ENV', 'LARAVEL_SAIL'])
+            return in_array($key, static::$passthroughVariables)
                     ? [$key => $value]
                     : [$key => false];
         })->all());
@@ -132,7 +151,8 @@ class ServeCommand extends Command
      */
     protected function host()
     {
-        return $this->input->getOption('host');
+        [$host, ] = $this->getHostAndPort();
+        return $host;
     }
 
     /**
@@ -142,9 +162,26 @@ class ServeCommand extends Command
      */
     protected function port()
     {
-        $port = $this->input->getOption('port') ?: 8000;
+        if (is_null($port = $this->input->getOption('port'))) {
+            [, $port] = $this->getHostAndPort();
+        }
 
-        return $port + $this->portOffset;
+        return ($port ?: 8000) + $this->portOffset;
+    }
+
+    /**
+     * Get the host and port from the host option string
+     *
+     * @return array
+     */
+    protected function getHostAndPort()
+    {
+        $hostParts = explode(':', $this->input->getOption('host'));
+
+        return [
+            $hostParts[0],
+            $hostParts[1] ?? null,
+        ];
     }
 
     /**
@@ -166,8 +203,8 @@ class ServeCommand extends Command
     protected function getOptions()
     {
         return [
-            ['host', null, InputOption::VALUE_OPTIONAL, 'The host address to serve the application on', config('server.host', '127.0.0.1')],
-            ['port', null, InputOption::VALUE_OPTIONAL, 'The port to serve the application on', config('server.port', 8000)],
+            ['host', null, InputOption::VALUE_OPTIONAL, 'The host address to serve the application on', Env::get('SERVER_HOST', '127.0.0.1')],
+            ['port', null, InputOption::VALUE_OPTIONAL, 'The port to serve the application on', Env::get('SERVER_PORT', 8000)],
             ['tries', null, InputOption::VALUE_OPTIONAL, 'The max number of ports to attempt to serve from', 10],
             ['no-reload', null, InputOption::VALUE_NONE, 'Do not reload the development server on .env file changes'],
         ];

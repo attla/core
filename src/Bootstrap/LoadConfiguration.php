@@ -2,66 +2,13 @@
 
 namespace Attla\Bootstrap;
 
-use Attla\Config;
-use Carbon\Carbon;
 use Attla\Application;
-use Carbon\CarbonPeriod;
-use Carbon\CarbonInterval;
-use Carbon\CarbonImmutable;
-use Attla\Database\Encapsulator;
+use Illuminate\Config\Repository;
+use Illuminate\Contracts\Config\Repository as RepositoryContract;
 use Symfony\Component\Finder\Finder;
-use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Carbon as IlluminateCarbon;
 
 class LoadConfiguration
 {
-    /**
-     * Default configuration
-     *
-     * @var array
-     */
-    protected $defaultConfig = [
-        'app' => [
-            'locale' => 'en_US',
-            'fallback_locale' => 'en',
-            'faker_locale' => 'en_US',
-        ],
-        'auth' => [
-            'guard' => 'web'
-        ],
-        'database' => [
-            'migrations' => 'migrations',
-        ],
-        'view' => [
-            'paths' => [],
-            'compiled' => '',
-        ],
-        'cache' => [
-            'stores' => [
-                'queries' => [
-                    'driver' => 'array',
-                ],
-            ],
-        ],
-        'session' => [
-            'driver' => 'cookie',
-            'lifetime' => 1440 * 365,
-            'expire_on_close' => false,
-            'encrypt' => false,
-            'files' => '',
-            'connection' => null,
-            'table' => 'sessions',
-            'store' => null,
-            'lottery' => [2, 100],
-            'cookie' => '__session',
-            'path' => '/',
-            'domain' => false,
-            'secure' => false,
-            'http_only' => true,
-            'same_site' => 'lax',
-        ],
-    ];
-
     /**
      * Bootstrap the given application
      *
@@ -70,34 +17,45 @@ class LoadConfiguration
      */
     public function bootstrap(Application $app)
     {
-        $app->instance('config', $config = new Config($this->appConfig($app)));
-        $this->loadPackagesConfigFiles($app, $config);
+        $app->instance('config', $config = new Repository());
+        $this->loadConfigurationFiles($app, $config);
 
-        date_default_timezone_set($config->get('timezone', 'UTC'));
+        // Finally, we will set the application's environment based on the configuration
+        // values that were loaded. We will pass a callback which will be used to get
+        // the environment in a web context where an "--env" switch is not present.
+        $app->detectEnvironment(function () use ($config) {
+            return $config->get('app.env', 'production');
+        });
+
+        date_default_timezone_set($config->get('app.timezone', 'UTC'));
+
         mb_internal_encoding('UTF-8');
-
-        $this->resolveLocale($config);
-        $this->resolveDatabase($config);
     }
 
     /**
      * Load the configuration items from all of the files
      *
      * @param \Attla\Application $app
-     * @param \Attla\Config $config
+     * @param \Illuminate\Contracts\Config\Repository $repository
      * @return void
+     *
+     * @throws \Exception
      */
-    protected function loadPackagesConfigFiles(Application $app, Config $config)
+    protected function loadConfigurationFiles(Application $app, RepositoryContract $repository)
     {
         $files = $this->getConfigurationFiles($app);
 
+        if (!isset($files['app'])) {
+            throw new \Exception('Unable to load the "app" configuration file.');
+        }
+
         foreach ($files as $key => $path) {
-            $config->set($key, require $path);
+            $repository->set($key, require $path);
         }
     }
 
     /**
-     * Get all of the packages configuration files
+     * Get all of the configuration files for the application
      *
      * @param \Attla\Application $app
      * @return array
@@ -132,78 +90,5 @@ class LoadConfiguration
         }
 
         return $nested;
-    }
-
-    /**
-     * Resolve locale from application
-     *
-     * @param \Attla\Config $config
-     * @return void
-     */
-    protected function resolveLocale(Config $config)
-    {
-        $defaultLocale = 'en_US';
-        $locale = $config->get('locale', $defaultLocale);
-        $config->set('app.locale', $locale);
-        $config->set('app.faker_locale', $config->get('faker_locale', $defaultLocale));
-        $this->setCarbonLocale($locale);
-    }
-
-    /**
-     * Set carbon locale
-     *
-     * @param string $locale
-     * @return void
-     */
-    protected function setCarbonLocale($locale)
-    {
-        Carbon::setLocale($locale);
-        CarbonImmutable::setLocale($locale);
-        CarbonPeriod::setLocale($locale);
-        CarbonInterval::setLocale($locale);
-
-        if (class_exists(IlluminateCarbon::class)) {
-            IlluminateCarbon::setLocale($locale);
-        }
-
-        if (class_exists(Date::class)) {
-            try {
-                $root = Date::getFacadeRoot();
-                $root->setLocale($locale);
-            } catch (\Throwable $e) {
-                // Non Carbon class in use in Date facade
-            }
-        }
-    }
-
-    /**
-     * Resolve database connection configuration
-     *
-     * @param \Attla\Config $config
-     * @return void
-     */
-    protected function resolveDatabase(Config $config)
-    {
-        $config->set('database.default', $driver = $config->get('db.driver', 'mysql'));
-        $config->set('database.connections.' . $driver, Encapsulator::getDriverConfig($driver));
-    }
-
-    /**
-     * Return application configuration
-     *
-     * @param \Attla\Application $app
-     * @return array
-     */
-    protected function appConfig(Application $app)
-    {
-        $config = $this->defaultConfig;
-
-        $config['view']['paths'] = [
-            $app->resourcePath('views')
-        ];
-        $config['view']['compiled'] = $app->storagePath('views');
-        $config['session']['files'] = $app->storagePath('sessions');
-
-        return array_merge($config, $app->getEnvironment());
     }
 }

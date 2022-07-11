@@ -2,9 +2,9 @@
 
 namespace Attla\Console\Commands;
 
+use Attla\Encrypter;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
-use Attla\Encrypter;
 
 class KeyGenerateCommand extends Command
 {
@@ -27,6 +27,13 @@ class KeyGenerateCommand extends Command
     protected $description = 'Set the application key';
 
     /**
+     * Config repository
+     *
+     * @var \Illuminate\Config\Repository
+     */
+    protected $config;
+
+    /**
      * Execute the console command
      *
      * @return void
@@ -34,6 +41,7 @@ class KeyGenerateCommand extends Command
     public function handle()
     {
         $key = Encrypter::generateKey();
+        $this->config = $this->laravel['config'];
 
         if ($this->option('show')) {
             return $this->line('<comment>' . $key . '</comment>');
@@ -49,45 +57,49 @@ class KeyGenerateCommand extends Command
     /**
      * Set the application key in the environment file
      *
-     * @param string $key
+     * @param string $newKey
      * @return bool
      */
-    protected function setKeyInEnvironmentFile($key)
+    protected function setKeyInEnvironmentFile($newKey)
     {
-        $currentKey = $this->laravel['config']['encrypt.secret'];
+        $currentKey = $this->config->get('app.key', '');
 
-        if (
-            strlen($currentKey) !== 0
-            && !$this->confirmToProceed('Confirm to proceed', function () {
-                return true;
-            })
-        ) {
+        if (strlen($currentKey) !== 0 && !$this->confirmToProceed()) {
             return false;
         }
 
-        $this->writeEnvironmentFileWith([
-            'encrypt' => [
-                'mode' => $this->laravel['config']['encrypt.mode'] ?? 'query',
-                'secret' => $key,
-            ],
-        ]);
+        $this->writeEnvironmentFileWith($newKey, $currentKey);
 
         return true;
     }
 
     /**
-     * Write a environment file with the given attributes
+     * Write a new environment file with the given key
      *
-     * @param array $environments
+     * @param string $newKey
      * @return void
      */
-    protected function writeEnvironmentFileWith($newEnvironments)
+    protected function writeEnvironmentFileWith($newKey, $currentKey)
     {
-        $oldEnvironments = $this->laravel->getEnvironment();
-        $environment = array_merge($oldEnvironments, $newEnvironments);
-        file_put_contents(
-            $this->laravel->environmentFilePath(),
-            str_replace('\\/', '/', json_encode($environment, JSON_PRETTY_PRINT))
-        );
+        $envFilePath = $this->laravel->environmentFilePath();
+
+        file_put_contents($envFilePath, preg_replace(
+            $this->replacementPattern('APP_KEY', $currentKey),
+            'APP_KEY=' . $newKey,
+            file_get_contents($envFilePath)
+        ));
+    }
+
+    /**
+     * Get a regex pattern that will match env key with any value
+     *
+     * @param string $key
+     * @param string $value
+     * @return string
+     */
+    protected function replacementPattern($name, $value)
+    {
+        $escaped = preg_quote('=' . $value, '/');
+        return "/^{$name}{$escaped}/m";
     }
 }

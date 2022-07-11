@@ -14,7 +14,6 @@ class RegisterProviders
      */
     public function bootstrap(Application $app)
     {
-        $app->registerApplicationProviders();
-        $app->registerPackagesProviders();
+        $app->registerConfiguredProviders();
     }
 }

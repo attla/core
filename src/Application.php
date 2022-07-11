@@ -10,6 +10,7 @@ use Attla\Providers\{
 };
 use Illuminate\Contracts\Http\Kernel as ContractHttpKernel;
 use Illuminate\Contracts\Console\Kernel as ContractConsoleKernel;
+use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\{
     Routing\Pipeline,
     Container\Container,
@@ -34,7 +35,7 @@ use Attla\Bootstrap\{
     RegisterProviders
 };
 
-class Application extends Container
+class Application extends Container implements ApplicationContract
 {
     /**
      * The Attla framework core package
@@ -685,5 +686,65 @@ class Application extends Container
         }
 
         throw new \RuntimeException('Unable to detect application namespace.');
+    }
+
+    public function bootstrapPath($path = '')
+    {
+    }
+
+    public function isDownForMaintenance()
+    {
+    }
+
+    public function maintenanceMode()
+    {
+    }
+
+    public function registerDeferredProvider($provider, $service = null)
+    {
+    }
+
+    public function resolveProvider($provider)
+    {
+    }
+
+    public function boot()
+    {
+    }
+
+    public function booting($callback)
+    {
+    }
+
+    public function booted($callback)
+    {
+    }
+
+    public function getProviders($provider)
+    {
+    }
+
+    public function hasBeenBootstrapped()
+    {
+    }
+
+    public function loadDeferredProviders()
+    {
+    }
+
+    public function setLocale($locale)
+    {
+    }
+
+    public function shouldSkipMiddleware()
+    {
+    }
+
+    public function terminating($callback)
+    {
+    }
+
+    public function terminate()
+    {
     }
 }

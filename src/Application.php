@@ -255,7 +255,7 @@ class Application extends Container implements ApplicationContract
      * @param string[]|string $providers
      * @return void
      */
-    public function register($providers)
+    public function register($providers, $force = false)
     {
         $this['provider']
             ->load($providers)
@@ -293,7 +293,7 @@ class Application extends Container implements ApplicationContract
      * @param string[]|string $bootstrappers
      * @return void
      */
-    protected function bootstrapWith($bootstrappers)
+    public function bootstrapWith($bootstrappers)
     {
         foreach ((array) $bootstrappers as $bootstrapper) {
             $this[$bootstrapper]->bootstrap($this);

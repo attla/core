@@ -2,7 +2,6 @@
 
 namespace Attla\Providers\Http;
 
-use Attla\Minify;
 use Illuminate\Support\ServiceProvider;
 
 class ViewServiceProvider extends ServiceProvider
@@ -18,15 +17,6 @@ class ViewServiceProvider extends ServiceProvider
 
         $this->registerNamespaces();
         $this->defineDirectives($bladeCompiler);
-
-        if ($this->app['config']->get('app.minify', false)) {
-            $bladeCompiler->extend(function ($value, $compiler) {
-                return Minify::compile($value, [
-                    'disable_comments' => true,
-                    'preserve_conditional_comments' => true,
-                ]);
-            });
-        }
     }
 
     /**

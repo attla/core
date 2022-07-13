@@ -31,7 +31,7 @@ abstract class Eloquent extends EloquentModel
         } elseif ($attributes instanceof Arrayable) {
             $attributes = $attributes->toArray();
         } elseif ($attributes instanceof Jsonable) {
-            $attributes = json_decode($value->toJson(), true);
+            $attributes = json_decode($attributes->toJson(), true);
         } elseif ($attributes instanceof \JsonSerializable) {
             $attributes = (array) $attributes->jsonSerialize();
         } elseif ($attributes instanceof \Traversable) {

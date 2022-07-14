@@ -2,8 +2,6 @@
 
 namespace Attla\Middleware;
 
-use Attla\Cookier;
-use Attla\Encrypter;
 use Illuminate\Translation\Translator;
 
 class Csrf
@@ -41,7 +39,7 @@ class Csrf
             $this->translator = $translator;
         }
 
-        $this->token = Encrypter::hash(
+        $this->token = \Pincryp::hash(
             url()->full()
             . \Browser::browserFamily()
             . \Browser::browserVersionMajor()
@@ -65,7 +63,7 @@ class Csrf
             || $this->tokensMatch($request)
         ) {
             if (!$isExcept) {
-                Cookier::set($this->timeToken(), $this->token, 60);
+                \Cookier::set($this->timeToken(), $this->token, 60);
             }
 
             return $next($request);
@@ -123,9 +121,9 @@ class Csrf
             && !is_null($referer)
             && strpos($referer, $request->root()) !== false
             || !\Browser::isBot()
-            && ($token === Cookier::get($this->timeToken())
-                || (Encrypter::hashEquals(url()->full() . $this->browser(), $token)
-                    || Encrypter::hashEquals(rtrim($referer, '/') . $this->browser(), $token)));
+            && ($token === \Cookier::get($this->timeToken())
+                || (\Pincryp::hashEquals(url()->full() . $this->browser(), $token)
+                    || \Pincryp::hashEquals(rtrim($referer, '/') . $this->browser(), $token)));
     }
 
     /**

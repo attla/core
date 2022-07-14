@@ -14,7 +14,6 @@ class HttpSupportServiceProvider extends Aggregate
     protected $providers = [
         \Illuminate\Cache\CacheServiceProvider::class,
         \Illuminate\Cookie\CookieServiceProvider::class,
-        CookierServiceProvider::class,
         \Illuminate\Database\DatabaseServiceProvider::class,
         \Illuminate\Filesystem\FilesystemServiceProvider::class,
         \Illuminate\Routing\RoutingServiceProvider::class,

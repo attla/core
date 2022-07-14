@@ -2,10 +2,7 @@
 
 namespace Attla\Auth;
 
-use Attla\Jwt;
-use Attla\Cookier;
 use App\Models\User;
-use Attla\Encrypter;
 use Attla\Application;
 use Illuminate\Contracts\Auth\Authenticatable;
 
@@ -130,7 +127,7 @@ class DefaultProvider implements GuardInterface
     {
         $user = null;
 
-        if (is_object($sign = Cookier::get('sign') ?: Jwt::decode($this->request->bearerToken()))) {
+        if (is_object($sign = \Cookier::get('sign') ?: \DataToken::decode($this->request->bearerToken()))) {
             $user = new User((array) $sign);
             $user->exists = true;
         }
@@ -145,7 +142,7 @@ class DefaultProvider implements GuardInterface
      */
     public function logout()
     {
-        Cookier::forget('sign');
+        \Cookier::forget('sign');
     }
 
     /**
@@ -232,7 +229,7 @@ class DefaultProvider implements GuardInterface
      */
     protected function checkCredentials(Authenticatable $user, array $credentials)
     {
-        return Encrypter::hashEquals($credentials['password'], $user->password);
+        return \Pincryp::hashEquals($credentials['password'], $user->password);
     }
 
     /**
@@ -244,10 +241,10 @@ class DefaultProvider implements GuardInterface
      */
     public function createSign(Authenticatable $user, int $remember)
     {
-        $sign = Jwt::payload($user->getAttributes())
+        $sign = \DataToken::payload($user->getAttributes())
             ->sign($remember)
             ->encode();
-        Cookier::set('sign', $sign, $remember);
+        \Cookier::set('sign', $sign, $remember);
         return $sign;
     }
 

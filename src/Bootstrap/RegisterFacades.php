@@ -6,18 +6,10 @@ use Attla\Application;
 use Attla\AliasLoader;
 use Attla\PackageDiscover;
 use Illuminate\Support\Facades\Facade;
-use Attla\Facades\{
-    Cookie,
-    Encrypter,
-    Jwt,
-};
 
 class RegisterFacades
 {
     private $aliases = [
-        'Cookie' => Cookie::class,
-        'Encrypter' => Encrypter::class,
-        'Jwt' => Jwt::class,
     ];
 
     /**

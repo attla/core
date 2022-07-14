@@ -1,6 +1,5 @@
 <?php
 
-use Attla\Encrypter;
 use Attla\Application;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Date;
@@ -13,7 +12,7 @@ use Illuminate\Support\Facades\Date;
  */
 function encode($data)
 {
-    return Encrypter::encode($data);
+    return \Pincryp::encode($data);
 }
 
 /**
@@ -25,7 +24,7 @@ function encode($data)
  */
 function decode($data, $assoc = false)
 {
-    return Encrypter::decode($data, '', $assoc);
+    return \Pincryp::decode($data, '', $assoc);
 }
 
 /**
@@ -37,7 +36,7 @@ function decode($data, $assoc = false)
  */
 function encrypt($password, $salt = '')
 {
-    return Encrypter::hash($password, $salt);
+    return \Pincryp::hash($password, $salt);
 }
 
 /**

@@ -18,6 +18,9 @@
     "require": {
         "php": "^8.0.2",
         "attla/laravel-html-minify": "dev-main",
+        "attla/cookier": "dev-main",
+        "attla/data-token": "dev-main",
+        "attla/pincryp": "dev-main",
         "doctrine/dbal": "^2.0 || ^3.0",
         "illuminate/cache": "^9.0",
         "illuminate/config": "^9.0",

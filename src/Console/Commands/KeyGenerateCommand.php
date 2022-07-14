@@ -2,7 +2,6 @@
 
 namespace Attla\Console\Commands;
 
-use Attla\Encrypter;
 use Illuminate\Console\Command;
 use Illuminate\Console\ConfirmableTrait;
 
@@ -40,7 +39,7 @@ class KeyGenerateCommand extends Command
      */
     public function handle()
     {
-        $key = Encrypter::generateKey();
+        $key = \Pincryp::generateKey();
         $this->config = $this->laravel['config'];
 
         if ($this->option('show')) {

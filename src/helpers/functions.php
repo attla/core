@@ -802,49 +802,6 @@ function is_name($name)
 }
 
 /**
- * Serialize data if needed
- *
- * @param string $data
- * @return string
- */
-function maybe_serialize($data)
-{
-    return (is_array($data) || is_object($data)) && !is_serialized($data) ? @serialize($data) : $data;
-}
-
-/**
- * Unserialize value only if it was serialized
- *
- * @param string $data
- * @return mixed
- */
-function maybe_unserialize($data)
-{
-    return is_serialized($data) ? @unserialize($data) : $data;
-}
-
-/**
- * Check value to find if it was serialized
- *
- * @param string $data
- * @return bool
- */
-function is_serialized($data)
-{
-    if (!is_string($data) || !$data) {
-        return false;
-    }
-
-    try {
-        $unserialized = @unserialize($data);
-    } catch (\Exception) {
-        return false;
-    }
-
-    return serialize($unserialized) === $data;
-}
-
-/**
  * Check if it is a valid base64
  *
  * @param string $data
@@ -853,15 +810,4 @@ function is_serialized($data)
 function is_base64($data)
 {
     return base64_encode(base64_decode($data)) === $data;
-}
-
-/**
- * Check if it is a valid http_query
- *
- * @param string $data
- * @return bool
- */
-function is_http_query($data)
-{
-    return preg_match('/^([+\w\.\/%_-]+=([+\w\.\/%_-]*)?(&[+\w\.\/%_-]+(=[+\w\.\/%_-]*)?)*)?$/', $data) ? true : false;
 }
